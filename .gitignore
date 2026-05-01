@@ -58,3 +58,4 @@ __fixtures__/.cache/
 *.mobileprovision
 *.pem
 !plugins/assets/*.pem
+!android/app/src/main/res/raw/*.pem
