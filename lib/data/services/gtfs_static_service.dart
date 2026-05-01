@@ -31,7 +31,7 @@ class GtfsStaticService {
     if (entry == null) {
       throw Exception('routes.txt missing from GTFS zip');
     }
-    final csvText = utf8.decode(entry.content as List<int>);
+    final csvText = utf8.decode(entry.content);
     final rows = const CsvDecoder(
       dynamicTyping: false,
     ).convert(csvText);
