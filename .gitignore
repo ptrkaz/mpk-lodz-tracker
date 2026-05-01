@@ -1,47 +1,51 @@
-# Learn more https://docs.github.com/en/get-started/getting-started-with-git/ignoring-files
-
-# dependencies
-node_modules/
-
-# Expo
-.expo/
-dist/
-web-build/
-expo-env.d.ts
-
-# Native
-.kotlin/
-*.orig.*
-*.jks
-*.p8
-*.p12
-*.key
-*.mobileprovision
-
-# Metro
-.metro-health-check*
-
-# debug
-npm-debug.*
-yarn-debug.*
-yarn-error.*
-
-# macOS
+# Miscellaneous
+*.class
+*.log
+*.pyc
+*.swp
 .DS_Store
-*.pem
-!plugins/assets/*.pem
+.atom/
+.buildlog/
+.history
+.svn/
+.swp
+migrate_working_dir/
 
-# local env files
-.env*.local
+# IntelliJ related
+*.iml
+*.ipr
+*.iws
+.idea/
 
-# typescript
-*.tsbuildinfo
+# The .vscode folder contains launch configuration and tasks you configure in
+# VS Code which you may wish to be included in version control, so this is
+# intentionally not ignored. But you might choose to ignore it if you don't want it.
+# .vscode/
 
-# generated native folders
-/ios
-/android
+# Flutter/Dart/Pub related
+# Libraries should not include pubspec.lock, per https://dart.dev/guides/libraries/private-files#pubspeclock.
+/pubspec.lock
+**/doc/api/
+.dart_tool/
+.flutter-plugins
+.flutter-plugins-dependencies
+.pub-cache/
+.pub/
+/build/
 
-# project-specific
+# Symbolication related
+app.*.symbols
+
+# Obfuscation related
+app.*.map.json
+
+# Android Studio will place build artifacts here
+/android/app/debug
+/android/app/profile
+/android/app/release
+
+# Project-specific
 .env
-.env.local
+.env.json
 .superpowers/
+__fixtures__/.cache/
