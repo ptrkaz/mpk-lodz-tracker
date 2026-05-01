@@ -38,5 +38,17 @@
   "@markerAgo": {
     "placeholders": { "seconds": { "type": "int" } }
   },
-  "permissionsLocationDenied": "Brak dostępu do lokalizacji"
+  "permissionsLocationDenied": "Brak dostępu do lokalizacji",
+  "appTitle": "Łódź Transit",
+  "@appTitle": {},
+  "searchPlaceholder": "Szukaj linii…",
+  "@searchPlaceholder": {},
+  "navMap": "Mapa",
+  "@navMap": {},
+  "navLines": "Linie",
+  "@navLines": {},
+  "navFavorites": "Ulubione",
+  "@navFavorites": {},
+  "screenComingSoon": "Wkrótce",
+  "@screenComingSoon": {}
 }

@@ -189,6 +189,42 @@ abstract class AppLocalizations {
   /// In pl, this message translates to:
   /// **'Brak dostępu do lokalizacji'**
   String get permissionsLocationDenied;
+
+  /// No description provided for @appTitle.
+  ///
+  /// In pl, this message translates to:
+  /// **'Łódź Transit'**
+  String get appTitle;
+
+  /// No description provided for @searchPlaceholder.
+  ///
+  /// In pl, this message translates to:
+  /// **'Szukaj linii…'**
+  String get searchPlaceholder;
+
+  /// No description provided for @navMap.
+  ///
+  /// In pl, this message translates to:
+  /// **'Mapa'**
+  String get navMap;
+
+  /// No description provided for @navLines.
+  ///
+  /// In pl, this message translates to:
+  /// **'Linie'**
+  String get navLines;
+
+  /// No description provided for @navFavorites.
+  ///
+  /// In pl, this message translates to:
+  /// **'Ulubione'**
+  String get navFavorites;
+
+  /// No description provided for @screenComingSoon.
+  ///
+  /// In pl, this message translates to:
+  /// **'Wkrótce'**
+  String get screenComingSoon;
 }
 
 class _AppLocalizationsDelegate

@@ -75,4 +75,22 @@ class AppLocalizationsPl extends AppLocalizations {
 
   @override
   String get permissionsLocationDenied => 'Brak dostępu do lokalizacji';
+
+  @override
+  String get appTitle => 'Łódź Transit';
+
+  @override
+  String get searchPlaceholder => 'Szukaj linii…';
+
+  @override
+  String get navMap => 'Mapa';
+
+  @override
+  String get navLines => 'Linie';
+
+  @override
+  String get navFavorites => 'Ulubione';
+
+  @override
+  String get screenComingSoon => 'Wkrótce';
 }
