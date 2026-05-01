@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:mpk_lodz_tracker/l10n/app_localizations.dart';
 import 'package:provider/provider.dart';
+
 import '../../../../domain/models/line.dart';
 import '../../../../domain/models/vehicle.dart';
+import '../../../core/design_tokens.dart';
 import '../../map/view_models/bootstrap_view_model.dart';
 import '../view_models/filter_view_model.dart';
 import 'line_chip.dart';
@@ -14,8 +16,9 @@ class FilterSheet extends StatefulWidget {
     return showModalBottomSheet<void>(
       context: context,
       isScrollControlled: true,
+      backgroundColor: Colors.transparent,
       builder: (_) => const FractionallySizedBox(
-        heightFactor: 0.6,
+        heightFactor: 0.7,
         child: FilterSheet(),
       ),
     );
@@ -45,8 +48,22 @@ class _FilterSheetState extends State<FilterSheet> {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
-    return Padding(
-      padding: const EdgeInsets.all(16),
+    final scheme = Theme.of(context).colorScheme;
+
+    return Container(
+      decoration: BoxDecoration(
+        color: scheme.surfaceContainerLowest,
+        borderRadius: const BorderRadius.vertical(
+          top: Radius.circular(LodzRadius.sheet),
+        ),
+        boxShadow: LodzShadows.level2,
+      ),
+      padding: const EdgeInsets.fromLTRB(
+        LodzSpacing.edgeMargin,
+        LodzSpacing.stackGap,
+        LodzSpacing.edgeMargin,
+        LodzSpacing.lg,
+      ),
       child: ListenableBuilder(
         listenable: Listenable.merge([
           context.watch<BootstrapViewModel>(),
@@ -60,19 +77,50 @@ class _FilterSheetState extends State<FilterSheet> {
           return Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              Text(l10n.filterTitle,
-                  style: Theme.of(context).textTheme.titleMedium),
-              const SizedBox(height: 10),
+              // Drag handle (matches Stitch design)
+              Center(
+                child: Container(
+                  width: 48,
+                  height: 6,
+                  margin: const EdgeInsets.only(bottom: LodzSpacing.lg),
+                  decoration: BoxDecoration(
+                    color: scheme.surfaceContainerHighest,
+                    borderRadius: BorderRadius.circular(LodzRadius.full),
+                  ),
+                ),
+              ),
+              Text(
+                l10n.filterTitle,
+                style: Theme.of(context).textTheme.titleMedium,
+              ),
+              const SizedBox(height: LodzSpacing.stackGap),
               TextField(
                 controller: _searchCtrl,
                 decoration: InputDecoration(
                   hintText: l10n.filterSearchPlaceholder,
-                  border: const OutlineInputBorder(),
+                  prefixIcon: const Icon(Icons.search),
+                  filled: true,
+                  fillColor: scheme.surfaceContainerLow,
                   isDense: true,
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(LodzRadius.full),
+                    borderSide: BorderSide(color: scheme.outlineVariant),
+                  ),
+                  enabledBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(LodzRadius.full),
+                    borderSide: BorderSide(color: scheme.outlineVariant),
+                  ),
+                  focusedBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(LodzRadius.full),
+                    borderSide: BorderSide(
+                      color: LodzColors.transitCyan,
+                      width: 2,
+                    ),
+                  ),
                 ),
                 onChanged: filter.setQuery,
               ),
-              const SizedBox(height: 10),
+              const SizedBox(height: LodzSpacing.stackGap),
               Row(
                 children: [
                   _TabButton(
@@ -87,7 +135,7 @@ class _FilterSheetState extends State<FilterSheet> {
                   ),
                 ],
               ),
-              const SizedBox(height: 10),
+              const SizedBox(height: LodzSpacing.stackGap),
               Expanded(
                 child: SingleChildScrollView(
                   child: Wrap(
@@ -110,8 +158,15 @@ class _FilterSheetState extends State<FilterSheet> {
                     onPressed: filter.clear,
                     child: Text(l10n.filterClear),
                   ),
-                  const SizedBox(width: 10),
+                  const SizedBox(width: LodzSpacing.stackGap),
                   FilledButton(
+                    style: FilledButton.styleFrom(
+                      backgroundColor: scheme.primary,
+                      foregroundColor: scheme.onPrimary,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(LodzRadius.md),
+                      ),
+                    ),
                     onPressed: () => Navigator.of(context).pop(),
                     child: Text(l10n.filterApply),
                   ),
@@ -142,36 +197,40 @@ class _FilterSheetState extends State<FilterSheet> {
 }
 
 class _TabButton extends StatelessWidget {
-  const _TabButton({required this.label, required this.active, required this.onTap});
+  const _TabButton({
+    required this.label,
+    required this.active,
+    required this.onTap,
+  });
+
   final String label;
   final bool active;
   final VoidCallback onTap;
 
   @override
   Widget build(BuildContext context) {
+    final scheme = Theme.of(context).colorScheme;
     return Expanded(
       child: InkWell(
         onTap: onTap,
         child: Container(
-          padding: const EdgeInsets.symmetric(vertical: 8),
+          padding: const EdgeInsets.symmetric(vertical: LodzSpacing.sm),
           alignment: Alignment.center,
           decoration: BoxDecoration(
             border: Border(
               bottom: BorderSide(
-                color: active
-                    ? Theme.of(context).colorScheme.primary
-                    : Colors.transparent,
+                color: active ? LodzColors.transitCyan : Colors.transparent,
                 width: 2,
               ),
             ),
           ),
-          child: Text(label,
-              style: TextStyle(
-                color: active
-                    ? Theme.of(context).colorScheme.onSurface
-                    : Theme.of(context).colorScheme.onSurfaceVariant,
-                fontWeight: active ? FontWeight.w700 : FontWeight.w500,
-              )),
+          child: Text(
+            label,
+            style: TextStyle(
+              color: active ? scheme.onSurface : scheme.onSurfaceVariant,
+              fontWeight: active ? FontWeight.w700 : FontWeight.w500,
+            ),
+          ),
         ),
       ),
     );
