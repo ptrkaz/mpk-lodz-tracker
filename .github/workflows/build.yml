@@ -1,0 +1,50 @@
+name: build
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  analyze-test-build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          cache: true
+
+      - name: Reconstruct secrets.json
+        env:
+          SECRETS_JSON: ${{ secrets.SECRETS_JSON }}
+          MAPTILER_KEY: ${{ secrets.MAPTILER_KEY }}
+        run: |
+          set -euo pipefail
+          if [[ -n "${SECRETS_JSON:-}" ]]; then
+            printf '%s' "$SECRETS_JSON" > secrets.json
+            echo "secrets.json built from SECRETS_JSON blob"
+          else
+            python3 tool/build_secrets_from_env.py
+          fi
+
+      - name: Verify secrets.json
+        run: ./tool/check_secrets.sh
+
+      - name: flutter pub get
+        run: flutter pub get
+
+      - name: flutter analyze
+        run: flutter analyze
+
+      - name: flutter test
+        run: flutter test
+
+      - name: flutter build apk
+        run: flutter build apk --dart-define-from-file=secrets.json
+
+      - name: Shred secrets.json
+        if: always()
+        run: rm -f secrets.json
