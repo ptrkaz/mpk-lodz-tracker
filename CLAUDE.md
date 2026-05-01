@@ -33,14 +33,17 @@ lib/
   domain/
     models/         Vehicle, Line, VehicleType, RoutesIndex typedef
   ui/
-    core/           constants, theme, color map
+    core/           design tokens (LodzColors/Spacing/Radius/Shadows), theme, vehicle colors
     features/
-      map/          MapScreen + MapViewModel + BootstrapViewModel + map widgets
+      shell/        RootShell with bottom nav + LinesScreen/FavoritesScreen stubs
+      map/          MapScreen + MapViewModel + BootstrapViewModel + LodzTopAppBar + MapSearchBar + LocateFab + LastUpdateHint + VehicleMarkersLayer
       filter/       FilterSheet + LineChip + FilterViewModel
   l10n/             ARB files (Polish only) + generated AppLocalizations
 ```
 
-ViewModels are `ChangeNotifier`s wired via `provider`. `MapViewModel` owns `Timer.periodic` polling + `WidgetsBindingObserver` for AppLifecycle pause/resume. The vehicle layer is a separate `VehicleMarkersLayer` adapter that pushes GeoJSON into the MapLibre native source on every store change.
+ViewModels are `ChangeNotifier`s wired via `provider`. `MapViewModel` owns `Timer.periodic` polling + `WidgetsBindingObserver` for AppLifecycle pause/resume. The vehicle layer is a separate `VehicleMarkersLayer` adapter that pushes GeoJSON into the MapLibre native source on every store change. `RootShell` hosts the three tabs in an `IndexedStack`; only the Map tab is functional, Lines/Favorites are "Wkrótce" placeholders.
+
+Visual style follows the Stitch "Łódź Urban Transit System" design (`stitch_city_transit_tracker/d_urban_transit_system/DESIGN.md`): paper-white surfaces, Inter typography (loaded at runtime via `google_fonts`), tram=yellow `#FACC15`, bus=magenta `#D946EF`, cyan `#06B6D4` for interactive states. Tokens live in `lib/ui/core/design_tokens.dart`; never hardcode colors/spacing in widgets — pull from `LodzColors`/`LodzSpacing`/`LodzRadius`/`LodzShadows`.
 
 ## Sharp edges
 
@@ -56,7 +59,7 @@ ViewModels are `ChangeNotifier`s wired via `provider`. `MapViewModel` owns `Time
 
 ## Spec gaps still open
 
-Same as the original RN spec — marker tap callout, bearing rotation on markers, offline indicator (50% opacity + toast), hide locate FAB on permission denial, `SystemUiOverlayStyle` polish for Android. Plus a Flutter-specific gap: the GTFS-RT decoder passes through vehicles with `lat=0/lon=0` (real fixture-data quirk); a small filter at the decoder level would tighten correctness.
+Carryover from the original RN spec — marker tap callout, offline indicator (50% opacity + toast), hide locate FAB on permission denial, `SystemUiOverlayStyle` polish for Android. Plus: the GTFS-RT decoder passes through vehicles with `lat=0/lon=0` (real fixture-data quirk); a small filter at the decoder level would tighten correctness. Bearing rotation on markers is now wired (Stitch restyle T11) — vehicles missing `bearing` simply don't render the arrow, which is intentional.
 
 ## Iterating on this codebase
 
