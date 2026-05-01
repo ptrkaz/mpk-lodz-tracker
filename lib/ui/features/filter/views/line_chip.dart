@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+
 import '../../../../domain/models/vehicle.dart';
+import '../../../core/design_tokens.dart';
 import '../../../core/vehicle_colors.dart';
 
 class LineChip extends StatelessWidget {
@@ -18,25 +20,38 @@ class LineChip extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final color = colorFor(type);
+    final accent = colorFor(type);
+    final onAccent = onColorFor(type);
+    final scheme = Theme.of(context).colorScheme;
+
+    final bg = selected ? accent : scheme.surfaceContainerLowest;
+    final fg = selected ? onAccent : scheme.onSurface;
+    final borderColor = selected ? accent : scheme.outlineVariant;
+
     return InkWell(
       onTap: onTap,
-      borderRadius: BorderRadius.circular(16),
+      borderRadius: BorderRadius.circular(LodzRadius.full),
       child: Container(
         key: const ValueKey('line-chip-container'),
-        margin: const EdgeInsets.only(right: 6, bottom: 6),
-        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-        decoration: BoxDecoration(
-          color: selected ? color : Theme.of(context).colorScheme.surface,
-          border: Border.all(color: color),
-          borderRadius: BorderRadius.circular(16),
+        margin: const EdgeInsets.only(right: LodzSpacing.sm, bottom: LodzSpacing.sm),
+        padding: const EdgeInsets.symmetric(
+          horizontal: LodzSpacing.stackGap,
+          vertical: LodzSpacing.xs + 2,
         ),
+        constraints: const BoxConstraints(minWidth: 44, minHeight: 32),
+        decoration: BoxDecoration(
+          color: bg,
+          border: Border.all(color: borderColor),
+          borderRadius: BorderRadius.circular(LodzRadius.full),
+        ),
+        alignment: Alignment.center,
         child: Text(
           number,
           style: TextStyle(
-            color: selected ? Colors.white : Theme.of(context).colorScheme.onSurface,
-            fontSize: 13,
+            color: fg,
+            fontSize: 14,
             fontWeight: FontWeight.w600,
+            fontFeatures: const [FontFeature.tabularFigures()],
           ),
         ),
       ),

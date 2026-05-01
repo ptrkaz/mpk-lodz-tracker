@@ -38,4 +38,34 @@ void main() {
     final decoration = container.decoration as BoxDecoration;
     expect(decoration.color, kVehicleColors[VehicleType.bus]);
   });
+
+  testWidgets('selected tram chip uses black foreground text', (tester) async {
+    await tester.pumpWidget(MaterialApp(
+      home: Scaffold(
+        body: LineChip(
+          number: '10',
+          type: VehicleType.tram,
+          selected: true,
+          onTap: () {},
+        ),
+      ),
+    ));
+    final text = tester.widget<Text>(find.text('10'));
+    expect(text.style!.color, const Color(0xFF000000));
+  });
+
+  testWidgets('selected bus chip uses white foreground text', (tester) async {
+    await tester.pumpWidget(MaterialApp(
+      home: Scaffold(
+        body: LineChip(
+          number: '57',
+          type: VehicleType.bus,
+          selected: true,
+          onTap: () {},
+        ),
+      ),
+    ));
+    final text = tester.widget<Text>(find.text('57'));
+    expect(text.style!.color, const Color(0xFFFFFFFF));
+  });
 }
