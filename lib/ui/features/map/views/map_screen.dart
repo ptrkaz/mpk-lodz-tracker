@@ -10,7 +10,6 @@ import '../view_models/map_view_model.dart';
 import 'last_update_hint.dart';
 import 'locate_fab.dart';
 import 'map_search_bar.dart';
-import 'top_app_bar.dart';
 import 'vehicle_markers_layer.dart';
 
 class MapScreen extends StatefulWidget {
@@ -84,14 +83,18 @@ class _MapScreenState extends State<MapScreen> {
             onStyleLoadedCallback: () => _syncLayer(),
           ),
         ),
-        // Top app bar (translucent, docked).
-        const Positioned(top: 0, left: 0, right: 0, child: LodzTopAppBar()),
-        // Floating search bar tucked under the app bar.
+        // Floating search bar — sits below the status bar via SafeArea.
         const Positioned(
-          top: 88,
+          top: 0,
           left: 0,
           right: 0,
-          child: MapSearchBar(),
+          child: SafeArea(
+            bottom: false,
+            child: Padding(
+              padding: EdgeInsets.only(top: LodzSpacing.sm),
+              child: MapSearchBar(),
+            ),
+          ),
         ),
         // Locate FAB — bottom-right.
         Positioned(

@@ -1,0 +1,280 @@
+<!DOCTYPE html>
+
+<html lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Łódź Transit</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;900&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "on-secondary": "#ffffff",
+                        "on-error-container": "#93000a",
+                        "tertiary-fixed": "#ffd9e4",
+                        "background": "#f9f9f9",
+                        "inverse-surface": "#2f3131",
+                        "inverse-primary": "#c6c6c6",
+                        "surface-container-high": "#e8e8e8",
+                        "primary-container": "#1b1b1b",
+                        "surface-dim": "#dadada",
+                        "on-tertiary": "#ffffff",
+                        "outline-variant": "#cfc4c5",
+                        "on-primary-fixed-variant": "#474747",
+                        "surface-bright": "#f9f9f9",
+                        "on-error": "#ffffff",
+                        "on-tertiary-container": "#f81a95",
+                        "secondary": "#00658d",
+                        "surface-variant": "#e2e2e2",
+                        "on-secondary-fixed-variant": "#004c6c",
+                        "outline": "#7e7576",
+                        "on-background": "#1a1c1c",
+                        "on-surface-variant": "#4c4546",
+                        "secondary-container": "#2fbcff",
+                        "surface-container-lowest": "#ffffff",
+                        "surface": "#f9f9f9",
+                        "on-secondary-container": "#004867",
+                        "surface-container-highest": "#e2e2e2",
+                        "tertiary-container": "#3e0021",
+                        "error": "#ba1a1a",
+                        "surface-tint": "#5e5e5e",
+                        "secondary-fixed": "#c6e7ff",
+                        "secondary-fixed-dim": "#83cfff",
+                        "surface-container-low": "#f3f3f3",
+                        "on-primary-fixed": "#1b1b1b",
+                        "tertiary-fixed-dim": "#ffb0cc",
+                        "on-surface": "#1a1c1c",
+                        "surface-container": "#eeeeee",
+                        "error-container": "#ffdad6",
+                        "primary-fixed-dim": "#c6c6c6",
+                        "on-secondary-fixed": "#001e2e",
+                        "primary": "#000000",
+                        "tertiary": "#000000",
+                        "inverse-on-surface": "#f1f1f1",
+                        "primary-fixed": "#e2e2e2",
+                        "on-primary": "#ffffff",
+                        "on-primary-container": "#848484",
+                        "on-tertiary-fixed-variant": "#8d0051",
+                        "on-tertiary-fixed": "#3e0021",
+                        "transit-tram": "#FACC15",
+                        "transit-bus": "#D946EF",
+                        "transit-cyan": "#06B6D4"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px",
+                        "sheet": "1.5rem"
+                    },
+                    "spacing": {
+                        "lg": "24px",
+                        "edge-margin": "16px",
+                        "xl": "32px",
+                        "xs": "4px",
+                        "stack-gap": "12px",
+                        "sm": "8px",
+                        "base": "4px",
+                        "md": "16px",
+                        "comfortable": "24px",
+                        "compact": "12px"
+                    },
+                    "fontFamily": {
+                        "label-md": ["Inter"],
+                        "display-lg": ["Inter"],
+                        "headline-md": ["Inter"],
+                        "body-md": ["Inter"],
+                        "title-sm": ["Inter"],
+                        "mono-num": ["Inter"],
+                        "body-sm": ["Inter"],
+                        "label-bold": ["Inter"]
+                    },
+                    "fontSize": {
+                        "label-md": ["12px", { "lineHeight": "16px", "fontWeight": "500" }],
+                        "display-lg": ["32px", { "lineHeight": "40px", "letterSpacing": "-0.02em", "fontWeight": "700" }],
+                        "headline-md": ["24px", { "lineHeight": "32px", "letterSpacing": "-0.01em", "fontWeight": "600" }],
+                        "body-md": ["16px", { "lineHeight": "24px", "fontWeight": "400" }],
+                        "title-sm": ["18px", { "lineHeight": "24px", "fontWeight": "600" }],
+                        "mono-num": ["14px", { "lineHeight": "20px", "fontWeight": "600" }],
+                        "body-sm": ["14px", { "lineHeight": "20px", "fontWeight": "400" }],
+                        "label-bold": ["12px", { "lineHeight": "16px", "fontWeight": "700" }]
+                    },
+                    "boxShadow": {
+                        "level-1": "0px 4px 20px 0px rgba(0,0,0,0.05)",
+                        "level-2": "0px 8px 32px 0px rgba(0,0,0,0.10)"
+                    }
+                }
+            }
+        }
+    </script>
+<style>
+        .material-symbols-outlined {
+          font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .material-symbols-outlined[data-weight="fill"] {
+            font-variation-settings: 'FILL' 1;
+        }
+        
+        /* Map Background Pattern */
+        .map-bg {
+            background-color: #f0f4f8;
+            background-image: 
+                radial-gradient(#d1d5db 1px, transparent 1px),
+                radial-gradient(#d1d5db 1px, transparent 1px);
+            background-size: 40px 40px;
+            background-position: 0 0, 20px 20px;
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background text-on-background font-body-md overflow-hidden antialiased">
+<!-- Main Map Canvas -->
+<main class="fixed inset-0 w-full h-full z-0 map-bg relative">
+<!-- Search Bar (Level 1 Elevation) -->
+<div class="absolute top-[88px] left-0 w-full px-edge-margin z-20 max-w-2xl mx-auto right-0">
+<div class="bg-surface-container-lowest h-14 rounded-full flex items-center px-4 shadow-level-1 border border-surface-variant">
+<span class="material-symbols-outlined text-on-surface-variant mr-3">search</span>
+<input class="flex-1 bg-transparent border-none outline-none text-body-md text-on-surface placeholder:text-on-surface-variant focus:ring-0 p-0" placeholder="Search stops, lines, or addresses" type="text"/>
+<button class="w-10 h-10 rounded-full bg-surface flex items-center justify-center hover:bg-surface-container transition-colors ml-2">
+<span class="material-symbols-outlined text-on-surface">tune</span>
+</button>
+</div>
+</div>
+<!-- Vehicle Indicators (Simulated on Map) -->
+<!-- Tram (Yellow) -->
+<div class="absolute top-1/4 left-1/3 z-10">
+<div class="relative w-8 h-8">
+<div class="absolute inset-0 bg-transit-tram rounded-full flex items-center justify-center shadow-md border-2 border-surface-container-lowest">
+<span class="font-mono-num text-[10px] text-black">10B</span>
+</div>
+<div class="absolute -bottom-1 -right-1 bg-surface-container-lowest rounded-full p-[2px] shadow-sm">
+<span class="material-symbols-outlined text-[12px] text-on-surface" style="transform: rotate(45deg);">navigation</span>
+</div>
+</div>
+</div>
+<!-- Bus (Magenta) -->
+<div class="absolute top-1/2 right-1/4 z-10">
+<div class="relative w-8 h-8">
+<div class="absolute inset-0 bg-transit-bus rounded-full flex items-center justify-center shadow-md border-2 border-surface-container-lowest">
+<span class="font-mono-num text-[10px] text-white">Z11</span>
+</div>
+<div class="absolute -bottom-1 -right-1 bg-surface-container-lowest rounded-full p-[2px] shadow-sm">
+<span class="material-symbols-outlined text-[12px] text-on-surface" style="transform: rotate(-15deg);">navigation</span>
+</div>
+</div>
+</div>
+<!-- Bus (Magenta) -->
+<div class="absolute bottom-1/3 left-1/4 z-10">
+<div class="relative w-8 h-8">
+<div class="absolute inset-0 bg-transit-bus rounded-full flex items-center justify-center shadow-md border-2 border-surface-container-lowest">
+<span class="font-mono-num text-[10px] text-white">57</span>
+</div>
+<div class="absolute -bottom-1 -right-1 bg-surface-container-lowest rounded-full p-[2px] shadow-sm">
+<span class="material-symbols-outlined text-[12px] text-on-surface" style="transform: rotate(180deg);">navigation</span>
+</div>
+</div>
+</div>
+<!-- Stop Markers -->
+<div class="absolute top-1/3 right-1/3 z-0 flex flex-col items-center">
+<div class="w-4 h-4 bg-surface-container-lowest rounded-full border-4 border-transit-cyan shadow-sm"></div>
+<span class="mt-1 font-label-md text-on-surface bg-surface-container-lowest/80 px-1 rounded backdrop-blur-sm">Piotrkowska</span>
+</div>
+<!-- FAB: GPS Centering -->
+<div class="absolute bottom-[280px] right-edge-margin z-20">
+<button class="w-12 h-12 bg-surface-container-lowest rounded-full shadow-level-2 flex items-center justify-center text-transit-cyan hover:bg-surface transition-colors border border-surface-variant">
+<span class="material-symbols-outlined" data-weight="fill">my_location</span>
+</button>
+</div>
+<!-- Partially Visible Bottom Sheet (Nearby Stops) -->
+<div class="absolute bottom-[80px] left-0 w-full z-30 max-w-2xl mx-auto right-0">
+<div class="bg-surface-container-lowest rounded-t-sheet shadow-level-2 border-t border-x border-surface-variant/50 pt-3 px-edge-margin pb-6 h-[200px]">
+<!-- Drag Handle -->
+<div class="w-12 h-1.5 bg-surface-variant rounded-full mx-auto mb-comfortable"></div>
+<h2 class="font-title-sm text-on-surface mb-stack-gap">Nearby Stops</h2>
+<!-- Stop List Items (Compact Spacing) -->
+<div class="space-y-compact">
+<!-- Item 1 -->
+<div class="flex items-center justify-between p-3 bg-surface rounded-lg border border-surface-variant/50 hover:bg-surface-container-low transition-colors cursor-pointer">
+<div class="flex items-center gap-3">
+<div class="w-10 h-10 bg-transit-cyan/10 rounded-full flex items-center justify-center text-transit-cyan">
+<span class="material-symbols-outlined text-[20px]">directions_transit</span>
+</div>
+<div>
+<h3 class="font-body-md font-semibold text-on-surface leading-tight">Piotrkowska Centrum</h3>
+<div class="flex gap-1 mt-1">
+<span class="px-2 py-0.5 bg-transit-tram text-black font-mono-num text-[10px] rounded-full">10B</span>
+<span class="px-2 py-0.5 bg-transit-tram text-black font-mono-num text-[10px] rounded-full">11</span>
+<span class="px-2 py-0.5 bg-transit-bus text-white font-mono-num text-[10px] rounded-full">Z11</span>
+</div>
+</div>
+</div>
+<button class="w-10 h-10 flex items-center justify-center text-transit-cyan">
+<span class="material-symbols-outlined" data-weight="fill">star</span>
+</button>
+</div>
+<!-- Item 2 -->
+<div class="flex items-center justify-between p-3 bg-surface rounded-lg border border-surface-variant/50 hover:bg-surface-container-low transition-colors cursor-pointer">
+<div class="flex items-center gap-3">
+<div class="w-10 h-10 bg-surface-variant/50 rounded-full flex items-center justify-center text-on-surface-variant">
+<span class="material-symbols-outlined text-[20px]">directions_bus</span>
+</div>
+<div>
+<h3 class="font-body-md font-semibold text-on-surface leading-tight">Kościuszki - Mickiewicza</h3>
+<div class="flex gap-1 mt-1">
+<span class="px-2 py-0.5 bg-transit-bus text-white font-mono-num text-[10px] rounded-full">57</span>
+<span class="px-2 py-0.5 bg-transit-bus text-white font-mono-num text-[10px] rounded-full">83</span>
+</div>
+</div>
+</div>
+<button class="w-10 h-10 flex items-center justify-center text-outline">
+<span class="material-symbols-outlined">star</span>
+</button>
+</div>
+</div>
+</div>
+</div>
+</main>
+<!-- TopAppBar -->
+<header class="bg-white/90 dark:bg-zinc-900/90 backdrop-blur-md text-cyan-600 dark:text-cyan-400 font-['Inter'] tracking-tight font-medium text-lg font-black tracking-tighter text-zinc-900 dark:text-zinc-50 docked full-width top-0 border-b border-zinc-100 dark:border-zinc-800 shadow-[0px_4px_20px_0px_rgba(0,0,0,0.05)] hover:bg-zinc-50 dark:hover:bg-zinc-800 transition-colors active:scale-95 duration-150 flex items-center justify-between px-4 h-16 w-full fixed top-0 z-50">
+<div class="flex items-center gap-4">
+<span class="material-symbols-outlined text-zinc-500 dark:text-zinc-400" data-icon="menu">menu</span>
+<span>Łódź Transit</span>
+</div>
+<div>
+<span class="material-symbols-outlined text-zinc-500 dark:text-zinc-400" data-icon="settings">settings</span>
+</div>
+</header>
+<!-- BottomNavBar (Mobile Only) -->
+<nav class="md:hidden bg-white dark:bg-zinc-950 text-cyan-600 dark:text-cyan-400 font-['Inter'] text-[11px] font-semibold uppercase tracking-wider docked full-width bottom-0 border-t rounded-t-2xl border-zinc-100 dark:border-zinc-800 shadow-[0px_-4px_16px_0px_rgba(0,0,0,0.04)] hover:text-zinc-900 dark:hover:text-zinc-100 transition-all cubic-bezier(0.4,0,0.2,1) fixed bottom-0 left-0 w-full h-20 z-50 flex justify-around items-center px-4 pb-safe bg-white dark:bg-zinc-950">
+<!-- Active Tab: Map -->
+<div class="flex flex-col items-center justify-center text-cyan-600 dark:text-cyan-400 bg-cyan-50 dark:bg-cyan-900/20 rounded-2xl px-6 py-1 cursor-pointer">
+<span class="material-symbols-outlined mb-1" data-icon="map" data-weight="fill">map</span>
+<span>Map</span>
+</div>
+<!-- Inactive Tab: Lines -->
+<div class="flex flex-col items-center justify-center text-zinc-400 dark:text-zinc-600 px-6 py-1 cursor-pointer">
+<span class="material-symbols-outlined mb-1" data-icon="directions_transit">directions_transit</span>
+<span>Lines</span>
+</div>
+<!-- Inactive Tab: Favorites -->
+<div class="flex flex-col items-center justify-center text-zinc-400 dark:text-zinc-600 px-6 py-1 cursor-pointer">
+<span class="material-symbols-outlined mb-1" data-icon="star">star</span>
+<span>Favorites</span>
+</div>
+</nav>
+<!-- SideNav/TopNav Links (Web Only - Hidden on Mobile) -->
+<nav class="hidden md:flex fixed top-0 right-16 h-16 items-center gap-6 z-50 pr-8">
+<a class="text-cyan-600 dark:text-cyan-400 font-label-md font-bold hover:bg-zinc-50 dark:hover:bg-zinc-800 transition-colors px-3 py-2 rounded-md" href="#">Map</a>
+<a class="text-zinc-500 dark:text-zinc-400 font-label-md hover:bg-zinc-50 dark:hover:bg-zinc-800 transition-colors px-3 py-2 rounded-md" href="#">Lines</a>
+<a class="text-zinc-500 dark:text-zinc-400 font-label-md hover:bg-zinc-50 dark:hover:bg-zinc-800 transition-colors px-3 py-2 rounded-md" href="#">Favorites</a>
+</nav>
+</body></html>

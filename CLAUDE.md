@@ -36,7 +36,7 @@ lib/
     core/           design tokens (LodzColors/Spacing/Radius/Shadows), theme, vehicle colors
     features/
       shell/        RootShell with bottom nav + LinesScreen/FavoritesScreen stubs
-      map/          MapScreen + MapViewModel + BootstrapViewModel + LodzTopAppBar + MapSearchBar + LocateFab + LastUpdateHint + VehicleMarkersLayer
+      map/          MapScreen + MapViewModel + BootstrapViewModel + MapSearchBar + LocateFab + LastUpdateHint + VehicleMarkersLayer
       filter/       FilterSheet + LineChip + FilterViewModel
   l10n/             ARB files (Polish only) + generated AppLocalizations
 ```
