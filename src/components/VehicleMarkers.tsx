@@ -33,11 +33,23 @@ export function VehicleMarkers({ vehicles, routes }: Props): React.JSX.Element {
     <GeoJSONSource id="vehicles" data={fc}>
       <Layer
         id="vehicle-circles"
+        type="circle"
+        paint={{
+          'circle-color': [
+            'match', ['get', 'type'],
+            'tram', VEHICLE_COLORS.tram,
+            'bus', VEHICLE_COLORS.bus,
+            VEHICLE_COLORS.unknown,
+          ] as unknown as string,
+          'circle-radius': 14,
+          'circle-stroke-color': '#ffffff',
+          'circle-stroke-width': 2,
+        }}
+      />
+      <Layer
+        id="vehicle-labels"
         type="symbol"
         layout={{
-          'icon-image': 'circle-15',
-          'icon-size': 1.4,
-          'icon-allow-overlap': true,
           'text-field': ['get', 'number'] as unknown as string,
           'text-size': 11,
           'text-allow-overlap': true,
@@ -45,14 +57,6 @@ export function VehicleMarkers({ vehicles, routes }: Props): React.JSX.Element {
         }}
         paint={{
           'text-color': '#ffffff',
-          'text-halo-color': [
-            'match',
-            ['get', 'type'],
-            'tram', VEHICLE_COLORS.tram,
-            'bus', VEHICLE_COLORS.bus,
-            VEHICLE_COLORS.unknown,
-          ] as unknown as string,
-          'text-halo-width': 4,
         }}
       />
     </GeoJSONSource>
