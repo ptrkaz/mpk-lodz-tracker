@@ -1,0 +1,39 @@
+#!/usr/bin/env bash
+# Wraps the real flutter binary. For build-related subcommands (run, build,
+# test, drive, attach, profile), appends --dart-define-from-file=secrets.json
+# when secrets.json exists at the repo root, unless the user has already
+# passed --dart-define-from-file themselves. All other subcommands pass
+# through unchanged.
+#
+# Activated via the committed .envrc (PATH_add tool) plus `direnv allow`.
+# Inside the repo, bare `flutter run` resolves to this script.
+set -euo pipefail
+
+script_dir=$(cd "$(dirname "$0")" && pwd)
+
+# Locate the real flutter binary by stripping this script's directory from PATH.
+real_flutter=$(
+  PATH=$(printf '%s' "$PATH" | tr ':' '\n' | grep -v -F -x "$script_dir" | paste -sd: -) \
+  command -v flutter || true
+)
+if [[ -z "$real_flutter" ]]; then
+  echo "tool/flutter: cannot find the real flutter binary in PATH (after stripping $script_dir)" >&2
+  exit 127
+fi
+
+cmd="${1:-}"
+inject=0
+case "$cmd" in
+  run|build|test|drive|attach|profile) inject=1 ;;
+esac
+
+if [[ "$inject" -eq 1 ]]; then
+  repo_root=$(git rev-parse --show-toplevel 2>/dev/null || pwd)
+  secrets="$repo_root/secrets.json"
+  # Only inject if (a) the file exists and (b) the user has not already passed the flag.
+  if [[ -f "$secrets" && "$*" != *"--dart-define-from-file"* ]]; then
+    exec "$real_flutter" "$@" --dart-define-from-file="$secrets"
+  fi
+fi
+
+exec "$real_flutter" "$@"
