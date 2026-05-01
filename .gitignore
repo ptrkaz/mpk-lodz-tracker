@@ -46,6 +46,16 @@ app.*.map.json
 
 # Project-specific
 .env
+.env*.local
 .env.json
 .superpowers/
 __fixtures__/.cache/
+
+# Signing / credentials
+*.jks
+*.p8
+*.p12
+*.key
+*.mobileprovision
+*.pem
+!plugins/assets/*.pem
