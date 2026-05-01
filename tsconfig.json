@@ -3,6 +3,11 @@
   "compilerOptions": {
     "strict": true,
     "noUncheckedIndexedAccess": true,
-    "exactOptionalPropertyTypes": true
+    "exactOptionalPropertyTypes": true,
+    "paths": {
+      "expo-file-system/legacy": [
+        "./node_modules/expo-file-system/build/legacy/index.d.ts"
+      ]
+    }
   }
 }
