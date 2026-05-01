@@ -1,0 +1,42 @@
+{
+  "@@locale": "pl",
+  "filterChipAll": "Wszystkie linie",
+  "@filterChipAll": {},
+  "filterChipSome": "{count, plural, one{{count} linia} few{{count} linie} many{{count} linii} other{{count} linii}}",
+  "@filterChipSome": {
+    "placeholders": {
+      "count": { "type": "int" }
+    }
+  },
+  "filterTitle": "Filtruj linie",
+  "filterSearchPlaceholder": "Szukaj linii…",
+  "filterTabTram": "Tramwaje",
+  "filterTabBus": "Autobusy",
+  "filterApply": "Zastosuj",
+  "filterClear": "Wyczyść",
+  "mapLastUpdate": "aktualizacja: {seconds}s temu",
+  "@mapLastUpdate": {
+    "placeholders": {
+      "seconds": { "type": "int" }
+    }
+  },
+  "mapLoading": "Ładowanie pozycji…",
+  "mapOffline": "Brak połączenia, ponawiam…",
+  "markerTram": "Tramwaj {number}",
+  "@markerTram": {
+    "placeholders": { "number": { "type": "String" } }
+  },
+  "markerBus": "Autobus {number}",
+  "@markerBus": {
+    "placeholders": { "number": { "type": "String" } }
+  },
+  "markerUnknown": "Linia {number}",
+  "@markerUnknown": {
+    "placeholders": { "number": { "type": "String" } }
+  },
+  "markerAgo": "{seconds}s temu",
+  "@markerAgo": {
+    "placeholders": { "seconds": { "type": "int" } }
+  },
+  "permissionsLocationDenied": "Brak dostępu do lokalizacji"
+}

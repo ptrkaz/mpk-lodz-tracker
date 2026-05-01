@@ -355,7 +355,7 @@ synthetic-package: true
 - [ ] **Step 3: Generate the localization classes**
 
 Run: `flutter gen-l10n`
-Expected: `.dart_tool/flutter_gen/gen_l10n/app_localizations.dart` is regenerated. The synthetic package `flutter_gen` becomes importable as `package:flutter_gen/gen_l10n/app_localizations.dart`.
+Expected: `lib/l10n/app_localizations.dart` and `lib/l10n/app_localizations_pl.dart` are regenerated. Both files are tracked in version control. Import in consumers via `package:mpk_lodz_tracker/l10n/app_localizations.dart`. (Flutter 3.41+ removed the `synthetic-package` mode; the old `package:flutter_gen/gen_l10n/...` import path no longer works.)
 
 - [ ] **Step 4: Smoke-test analyzer recognises the generated package**
 
@@ -617,7 +617,7 @@ import 'generated/gtfs-realtime.pb.dart';
 class GtfsRtService {
   GtfsRtService({http.Client? client}) : _client = client ?? http.Client();
 
-  static const Uri vehiclePositionsUrl = Uri(
+  static final Uri vehiclePositionsUrl = Uri(
     scheme: 'https',
     host: 'otwarte.miasto.lodz.pl',
     path: '/wp-content/uploads/2025/06/vehicle_positions.bin',
@@ -1569,7 +1569,7 @@ The bottom sheet renders inside `showModalBottomSheet` and consumes both `Bootst
 
 ```dart
 import 'package:flutter/material.dart';
-import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:mpk_lodz_tracker/l10n/app_localizations.dart';
 import 'package:provider/provider.dart';
 import '../../../../domain/models/line.dart';
 import '../../../../domain/models/vehicle.dart';
@@ -1614,7 +1614,7 @@ class _FilterSheetState extends State<FilterSheet> {
 
   @override
   Widget build(BuildContext context) {
-    final l10n = AppLocalizations.of(context)!;
+    final l10n = AppLocalizations.of(context);
     return Padding(
       padding: const EdgeInsets.all(16),
       child: ListenableBuilder(
@@ -1874,7 +1874,7 @@ git commit -m "feat(ui): VehicleMarkersLayer — GeoJSON source + circle/symbol 
 ```dart
 import 'dart:async';
 import 'package:flutter/material.dart';
-import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:mpk_lodz_tracker/l10n/app_localizations.dart';
 import 'package:provider/provider.dart';
 import '../view_models/map_view_model.dart';
 
@@ -1905,7 +1905,7 @@ class _LastUpdateHintState extends State<LastUpdateHint> {
     final last = context.watch<MapViewModel>().lastUpdate;
     if (last == null) return const SizedBox.shrink();
     final ageSec = DateTime.now().difference(last).inSeconds.clamp(0, 99999);
-    final l10n = AppLocalizations.of(context)!;
+    final l10n = AppLocalizations.of(context);
     return Positioned(
       left: 12,
       bottom: 16,
@@ -2003,7 +2003,7 @@ git commit -m "feat(ui): LocateFab — geolocator + camera flyTo"
 
 ```dart
 import 'package:flutter/material.dart';
-import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:mpk_lodz_tracker/l10n/app_localizations.dart';
 import 'package:provider/provider.dart';
 import '../../filter/view_models/filter_view_model.dart';
 import '../../filter/views/filter_sheet.dart';
@@ -2014,7 +2014,7 @@ class FilterChipButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final selectedCount = context.watch<FilterViewModel>().selectedRouteIds.length;
-    final l10n = AppLocalizations.of(context)!;
+    final l10n = AppLocalizations.of(context);
     final label = selectedCount == 0
         ? l10n.filterChipAll
         : l10n.filterChipSome(selectedCount);
@@ -2190,7 +2190,7 @@ git commit -m "feat(ui): MapScreen composition + layer sync"
 
 ```dart
 import 'package:flutter/material.dart';
-import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:mpk_lodz_tracker/l10n/app_localizations.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:provider/provider.dart';
 
