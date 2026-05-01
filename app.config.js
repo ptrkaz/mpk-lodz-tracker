@@ -33,6 +33,7 @@ module.exports = ({ config }) => ({
       ],
       'expo-dev-client',
       '@maplibre/maplibre-react-native',
+      './plugins/withCertumNetworkSecurity',
     ],
     extra: {
       maptilerKey: process.env.EXPO_PUBLIC_MAPTILER_KEY ?? '',
