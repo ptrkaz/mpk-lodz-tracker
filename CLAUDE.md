@@ -12,8 +12,11 @@ Flutter mobile app showing live MPK Łódź vehicle positions on a MapLibre map.
 - `flutter analyze` — static analysis. Treat warnings as errors.
 - `flutter test` — full unit + widget test suite.
 - `flutter test test/path/foo_test.dart` — single file. Add `-n 'partial name'` to narrow further.
-- `flutter run --dart-define=MAPTILER_KEY=<key>` — debug build on attached device/emulator.
-- `flutter build apk --dart-define=MAPTILER_KEY=<key>` — release APK.
+- First-time setup: `cp secrets.example.json secrets.json` (fill `MAPTILER_KEY` with a real value from https://cloud.maptiler.com/account/keys/), then `cp .envrc.example .envrc && direnv allow`. After that, the `tool/flutter` wrapper auto-appends `--dart-define-from-file=secrets.json` for build subcommands. Both `secrets.json` and `.envrc` are gitignored.
+- `./tool/check_secrets.sh` — verify `secrets.json` has all required keys filled in.
+- `flutter run` — debug build on attached device/emulator. Wrapper injects the secrets file.
+- `flutter build apk` — release APK. Wrapper injects the secrets file.
+- `flutter run --dart-define-from-file=secrets.json` — explicit form (works without direnv / outside the repo).
 - `./tool/gen_proto.sh` — regenerate `lib/data/services/generated/gtfs-realtime.pb.dart` from `proto/gtfs-realtime.proto`. Requires `protoc` on PATH and `dart pub global activate protoc_plugin`.
 - `flutter gen-l10n` — regenerate `AppLocalizations` after editing `lib/l10n/app_pl.arb`.
 
@@ -48,7 +51,7 @@ Visual style follows the Stitch "Łódź Urban Transit System" design (`stitch_c
 ## Sharp edges
 
 - **Certum CA on Android.** GTFS feed certs chain to Certum Trusted Root, not in Android's default trust store. `android/app/src/main/res/xml/network_security_config.xml` adds it as a trust anchor for `miasto.lodz.pl`. The PEM lives at `android/app/src/main/res/raw/certum_root_ca.pem` (and is allowlisted in `.gitignore` despite the global `*.pem` rule). To refresh the cert: `echo | openssl s_client -servername otwarte.miasto.lodz.pl -connect otwarte.miasto.lodz.pl:443 -showcerts 2>/dev/null | awk '/BEGIN CERTIFICATE/{c++} c==3{print} /END CERTIFICATE/{if(c==3) exit}' > android/app/src/main/res/raw/certum_root_ca.pem`.
-- **MAPTILER_KEY.** Pass via `--dart-define=MAPTILER_KEY=...`. Missing/empty produces a blank map (HTTP 403 from MapTiler). Read inside the app via `String.fromEnvironment('MAPTILER_KEY')`. Do NOT commit the key.
+- **Build-time secrets via `secrets.json`.** All build-time secrets (currently just `MAPTILER_KEY`) live in `secrets.json` at repo root, consumed via `--dart-define-from-file=secrets.json`. `secrets.json` is gitignored; `secrets.example.json` is the committed template. The app reads values via `String.fromEnvironment('<KEY>')`. Missing/empty `MAPTILER_KEY` produces a blank map (HTTP 403 from MapTiler). Locally, `tool/flutter` (a Bash wrapper) auto-appends the flag for `run`/`build`/`test`/`drive`/`attach`/`profile`. To activate the wrapper, copy `.envrc.example` to `.envrc` and run `direnv allow`; both `.envrc` and `secrets.json` are gitignored. The wrapper skips injection if the user already passed the flag. On CI, `secrets.json` is reconstructed by `.github/workflows/build.yml`: it prefers a single `SECRETS_JSON` repo secret holding the entire JSON body, and falls back to `tool/build_secrets_from_env.py` which assembles the file from individual env vars matching the keys in `secrets.example.json` (e.g. a `MAPTILER_KEY` repo secret). Do NOT commit `secrets.json` or `.envrc`. To add a new build-time secret: add it to `secrets.example.json`, append it to `secrets.json` locally, set the matching CI secret (either update `SECRETS_JSON` or add an individual repo secret), and read it via `String.fromEnvironment('NEW_KEY')`.
 - **Generated protobuf.** `lib/data/services/generated/` is committed but excluded from analyzer rules in `analysis_options.yaml`. Do not hand-edit; regenerate via `tool/gen_proto.sh`.
 - **maplibre_gl PlatformView.** The MapLibre map is a native PlatformView; `flutter_test` cannot render it. Vehicle layer + camera behavior is verified manually via `docs/manual-test.md`.
 - **Dart SDK pinned to `>=3.10.0`.** Required because the Flutter scaffold's `lib/main.dart` (and downstream code) uses dot-shorthand syntax which is a Dart 3.10 language feature.

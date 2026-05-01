@@ -9,8 +9,10 @@
 
 ## Run
 
+Ensure `secrets.json` exists at repo root with a real `MAPTILER_KEY` (see `README.md` setup) and that you have run `direnv allow` once. The `tool/flutter` wrapper appends `--dart-define-from-file=secrets.json` automatically. Then:
+
 ```sh
-flutter run --dart-define=MAPTILER_KEY=<your_key> -d <device-id>
+flutter run -d <device-id>
 ```
 
 `flutter devices` lists attached devices. For an Android emulator: `emulator -list-avds && emulator -avd <name> &`.
