@@ -617,7 +617,7 @@ import 'generated/gtfs-realtime.pb.dart';
 class GtfsRtService {
   GtfsRtService({http.Client? client}) : _client = client ?? http.Client();
 
-  static const Uri vehiclePositionsUrl = Uri(
+  static final Uri vehiclePositionsUrl = Uri(
     scheme: 'https',
     host: 'otwarte.miasto.lodz.pl',
     path: '/wp-content/uploads/2025/06/vehicle_positions.bin',
