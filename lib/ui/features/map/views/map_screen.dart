@@ -29,41 +29,40 @@ class _MapScreenState extends State<MapScreen> {
   MapLibreMapController? _ctrl;
   VehicleMarkersLayer? _layer;
 
+  // Saved in initState so dispose() can remove listeners without using context.
+  late final MapViewModel _mapVm;
+  late final BootstrapViewModel _bootVm;
+  late final FilterViewModel _filterVm;
+
   @override
   void initState() {
     super.initState();
-    final mapVm = context.read<MapViewModel>();
-    final bootVm = context.read<BootstrapViewModel>();
-    final filterVm = context.read<FilterViewModel>();
-    mapVm.attachLifecycle();
-    mapVm.start();
-    mapVm.addListener(_syncLayer);
-    bootVm.addListener(_syncLayer);
-    filterVm.addListener(_syncLayer);
+    _mapVm = context.read<MapViewModel>();
+    _bootVm = context.read<BootstrapViewModel>();
+    _filterVm = context.read<FilterViewModel>();
+    _mapVm.attachLifecycle();
+    _mapVm.start();
+    _mapVm.addListener(_syncLayer);
+    _bootVm.addListener(_syncLayer);
+    _filterVm.addListener(_syncLayer);
   }
 
   @override
   void dispose() {
-    final mapVm = context.read<MapViewModel>();
-    final bootVm = context.read<BootstrapViewModel>();
-    final filterVm = context.read<FilterViewModel>();
-    mapVm.removeListener(_syncLayer);
-    bootVm.removeListener(_syncLayer);
-    filterVm.removeListener(_syncLayer);
+    _mapVm.removeListener(_syncLayer);
+    _bootVm.removeListener(_syncLayer);
+    _filterVm.removeListener(_syncLayer);
     super.dispose();
   }
 
   Future<void> _syncLayer() async {
     final layer = _layer;
     if (layer == null) return;
-    final mapVm = context.read<MapViewModel>();
-    final bootVm = context.read<BootstrapViewModel>();
-    final filterVm = context.read<FilterViewModel>();
-    final selected = filterVm.selectedRouteIds;
+    final selected = _filterVm.selectedRouteIds;
     final visible = selected.isEmpty
-        ? mapVm.vehicles
-        : mapVm.vehicles.where((v) => selected.contains(v.routeId)).toList();
-    await layer.sync(visible, bootVm.routes);
+        ? _mapVm.vehicles
+        : _mapVm.vehicles.where((v) => selected.contains(v.routeId)).toList();
+    await layer.sync(visible, _bootVm.routes);
   }
 
   @override

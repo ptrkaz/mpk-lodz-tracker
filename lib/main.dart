@@ -11,7 +11,7 @@ import 'ui/core/app_theme.dart';
 import 'ui/features/filter/view_models/filter_view_model.dart';
 import 'ui/features/map/view_models/bootstrap_view_model.dart';
 import 'ui/features/map/view_models/map_view_model.dart';
-import 'ui/features/map/views/map_screen.dart';
+import 'ui/features/shell/views/root_shell.dart';
 
 void main() {
   runApp(const MpkApp());
@@ -48,7 +48,7 @@ class MpkApp extends StatelessWidget {
         themeMode: ThemeMode.system,
         localizationsDelegates: AppLocalizations.localizationsDelegates,
         supportedLocales: AppLocalizations.supportedLocales,
-        home: const MapScreen(),
+        home: const RootShell(),
       ),
     );
   }
