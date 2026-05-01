@@ -1,5 +1,8 @@
-import 'package:flutter_test/flutter_test.dart';
+import 'dart:async';
+
 import 'package:fake_async/fake_async.dart';
+import 'package:flutter/widgets.dart';
+import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:mpk_lodz_tracker/data/repositories/vehicles_repository.dart';
 import 'package:mpk_lodz_tracker/domain/models/vehicle.dart';
@@ -52,5 +55,54 @@ void main() {
       async.flushMicrotasks();
       verify(() => repo.fetchLatest()).called(1); // only the initial tick
     });
+  });
+
+  test('start() is idempotent under repeated calls', () {
+    fakeAsync((async) {
+      when(() => repo.fetchLatest()).thenAnswer((_) async => const []);
+      final vm = MapViewModel(repository: repo);
+      vm.start();
+      vm.start();
+      vm.start();
+      async.flushMicrotasks();
+      verify(() => repo.fetchLatest()).called(1);
+      vm.stop();
+    });
+  });
+
+  test('lifecycle pause stops polling, resume restarts it', () {
+    fakeAsync((async) {
+      when(() => repo.fetchLatest()).thenAnswer((_) async => const []);
+      final vm = MapViewModel(repository: repo);
+      vm.start();
+      async.flushMicrotasks();
+      verify(() => repo.fetchLatest()).called(1);
+
+      vm.didChangeAppLifecycleState(AppLifecycleState.paused);
+      async.elapse(LodzConstants.pollInterval * 2);
+      async.flushMicrotasks();
+      verifyNever(() => repo.fetchLatest());
+
+      vm.didChangeAppLifecycleState(AppLifecycleState.resumed);
+      async.flushMicrotasks();
+      verify(() => repo.fetchLatest()).called(1);
+
+      vm.stop();
+    });
+  });
+
+  test('refreshOnce after dispose does not notify listeners', () async {
+    final completer = Completer<List<Vehicle>>();
+    when(() => repo.fetchLatest()).thenAnswer((_) => completer.future);
+    final vm = MapViewModel(repository: repo);
+    var notifications = 0;
+    vm.addListener(() => notifications++);
+
+    final pending = vm.refreshOnce();
+    vm.dispose();
+    completer.complete([v1]);
+    await pending;
+
+    expect(notifications, 0);
   });
 }

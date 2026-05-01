@@ -9,6 +9,8 @@ class MapViewModel extends ChangeNotifier with WidgetsBindingObserver {
 
   final VehiclesRepository _repo;
   Timer? _timer;
+  bool _disposed = false;
+  bool _lifecycleAttached = false;
 
   List<Vehicle> _vehicles = <Vehicle>[];
   DateTime? _lastUpdate;
@@ -30,6 +32,7 @@ class MapViewModel extends ChangeNotifier with WidgetsBindingObserver {
   Future<void> refreshOnce() async {
     try {
       final next = await _repo.fetchLatest();
+      if (_disposed) return;
       _vehicles = next;
       _lastUpdate = DateTime.now();
       notifyListeners();
@@ -50,15 +53,20 @@ class MapViewModel extends ChangeNotifier with WidgetsBindingObserver {
   }
 
   void attachLifecycle() {
+    if (_lifecycleAttached) return;
     WidgetsBinding.instance.addObserver(this);
+    _lifecycleAttached = true;
   }
 
   void detachLifecycle() {
+    if (!_lifecycleAttached) return;
     WidgetsBinding.instance.removeObserver(this);
+    _lifecycleAttached = false;
   }
 
   @override
   void dispose() {
+    _disposed = true;
     stop();
     detachLifecycle();
     super.dispose();
