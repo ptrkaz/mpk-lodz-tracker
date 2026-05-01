@@ -1,33 +1,40 @@
 {
   "expo": {
-    "name": "vehicleapi-scaffold",
-    "slug": "vehicleapi-scaffold",
-    "version": "1.0.0",
+    "name": "MPK Łódź Tracker",
+    "slug": "mpk-lodz-tracker",
+    "version": "0.1.0",
     "orientation": "portrait",
+    "scheme": "mpklodz",
+    "userInterfaceStyle": "automatic",
     "icon": "./assets/icon.png",
-    "userInterfaceStyle": "light",
-    "newArchEnabled": true,
     "splash": {
       "image": "./assets/splash-icon.png",
       "resizeMode": "contain",
       "backgroundColor": "#ffffff"
     },
     "ios": {
-      "supportsTablet": true
+      "bundleIdentifier": "com.piotr.mpklodz",
+      "supportsTablet": false,
+      "infoPlist": {
+        "NSLocationWhenInUseUsageDescription": "Pokażemy pojazdy MPK najbliżej Ciebie."
+      }
     },
     "android": {
-      "adaptiveIcon": {
-        "foregroundImage": "./assets/adaptive-icon.png",
-        "backgroundColor": "#ffffff"
-      },
-      "edgeToEdgeEnabled": true,
-      "predictiveBackGestureEnabled": false
-    },
-    "web": {
-      "favicon": "./assets/favicon.png"
+      "package": "com.piotr.mpklodz",
+      "adaptiveIcon": { "backgroundColor": "#ffffff" }
     },
     "plugins": [
+      [
+        "expo-location",
+        {
+          "locationWhenInUsePermission": "Pokażemy pojazdy MPK najbliżej Ciebie."
+        }
+      ],
+      "expo-dev-client",
       "@maplibre/maplibre-react-native"
-    ]
+    ],
+    "extra": {
+      "maptilerKey": "${EXPO_PUBLIC_MAPTILER_KEY}"
+    }
   }
 }
