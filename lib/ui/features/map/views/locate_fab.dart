@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:maplibre_gl/maplibre_gl.dart';
 
+import '../../../core/design_tokens.dart';
+
 class LocateFab extends StatelessWidget {
   const LocateFab({super.key, required this.controllerProvider});
 
@@ -9,13 +11,24 @@ class LocateFab extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Positioned(
-      right: 12,
-      bottom: 16,
-      child: FloatingActionButton(
-        heroTag: 'locate',
-        onPressed: () => _onTap(context),
-        child: const Icon(Icons.my_location),
+    final scheme = Theme.of(context).colorScheme;
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        borderRadius: BorderRadius.circular(LodzRadius.full),
+        onTap: () => _onTap(context),
+        child: Container(
+          width: 48,
+          height: 48,
+          decoration: BoxDecoration(
+            color: scheme.surfaceContainerLowest,
+            shape: BoxShape.circle,
+            border: Border.all(color: scheme.surfaceContainerHighest),
+            boxShadow: LodzShadows.level2,
+          ),
+          alignment: Alignment.center,
+          child: const Icon(Icons.my_location, color: LodzColors.transitCyan),
+        ),
       ),
     );
   }
