@@ -1,7 +1,7 @@
 class TripUpdate {
   const TripUpdate({
     required this.tripId,
-    required this.delaySec,
+    this.delaySec,
     required this.stopTimeUpdates,
   });
 
@@ -13,8 +13,8 @@ class TripUpdate {
 class StopTimeUpdate {
   const StopTimeUpdate({
     required this.stopId,
-    required this.etaUnixSec,
-    required this.delaySec,
+    this.etaUnixSec,
+    this.delaySec,
   });
 
   final String stopId;

@@ -4,9 +4,9 @@ class Departure {
   const Departure({
     required this.lineNumber,
     required this.lineType,
-    required this.headsign,
+    this.headsign,
     required this.etaUnixSec,
-    required this.delaySec,
+    this.delaySec,
   });
 
   final String lineNumber;
