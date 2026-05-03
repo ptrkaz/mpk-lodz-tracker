@@ -1,0 +1,7 @@
+# Copy this file to .envrc, then run `direnv allow`.
+# The real .envrc is gitignored — any per-developer additions stay local.
+#
+# direnv hooks PATH so tool/ shadows the real flutter binary inside this repo.
+# After `direnv allow`, bare `flutter run` will auto-inject
+# --dart-define-from-file=secrets.json via tool/flutter.
+PATH_add tool

@@ -59,3 +59,11 @@ __fixtures__/.cache/
 *.pem
 !plugins/assets/*.pem
 !android/app/src/main/res/raw/*.pem
+
+# Build-time secrets consumed via --dart-define-from-file=secrets.json.
+# secrets.example.json IS committed; secrets.json is NOT.
+/secrets.json
+
+# Local direnv config. .envrc.example IS committed; .envrc is NOT, so
+# user-specific tweaks (extra `export FOO=...`, `dotenv`, etc.) stay local.
+/.envrc
