@@ -54,6 +54,9 @@ class LodzColors {
 
   // Soft cyan-tinted background used for the active bottom-nav pill
   static const Color cyanSurface = Color(0xFFECFEFF);
+
+  // Status accents
+  static const Color success = Color(0xFF15803D);
 }
 
 /// 4px-base spacing grid.
@@ -94,6 +97,13 @@ class LodzShadows {
       color: Color(0x1A000000), // 10% black
       blurRadius: 32,
       offset: Offset(0, 8),
+    ),
+  ];
+  static const List<BoxShadow> sheet = [
+    BoxShadow(
+      color: Color(0x14000000), // 8% black
+      blurRadius: 16,
+      offset: Offset(0, -4),
     ),
   ];
 }
