@@ -19,7 +19,7 @@ class LineChip extends StatelessWidget {
   final String number;
   final VehicleType type;
   final bool selected;
-  final VoidCallback onTap;
+  final VoidCallback? onTap;
   final LineChipSize size;
 
   double get _vertical => size == LineChipSize.dense ? 2 : 6;
