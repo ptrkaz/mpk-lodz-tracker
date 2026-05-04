@@ -1,52 +1,66 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:mpk_lodz_tracker/data/repositories/routes_repository.dart';
+import 'package:mpk_lodz_tracker/data/services/gtfs_cache_service.dart';
 import 'package:mpk_lodz_tracker/data/services/gtfs_static_service.dart';
-import 'package:mpk_lodz_tracker/data/services/routes_cache_service.dart';
 import 'package:mpk_lodz_tracker/domain/models/line.dart';
+import 'package:mpk_lodz_tracker/domain/models/stop.dart';
+import 'package:mpk_lodz_tracker/domain/models/trip_info.dart';
 import 'package:mpk_lodz_tracker/domain/models/vehicle.dart';
 
 class _MockStatic extends Mock implements GtfsStaticService {}
-class _MockCache extends Mock implements RoutesCacheService {}
+
+class _MockCache extends Mock implements GtfsCacheService {}
 
 void main() {
   late _MockStatic staticService;
   late _MockCache cacheService;
   late RoutesRepository repo;
 
-  final fixtureIndex = <String, Line>{
+  final fixtureRoutes = <String, Line>{
     'r1': const Line(routeId: 'r1', number: '8', type: VehicleType.tram),
   };
+  final fixtureBundle = GtfsCachedBundle(
+    routes: fixtureRoutes,
+    stops: <String, Stop>{},
+    trips: <String, TripInfo>{},
+  );
+  final fixtureStaticBundle = GtfsStaticBundle(
+    routes: fixtureRoutes,
+    stops: <String, Stop>{},
+    trips: <String, TripInfo>{},
+  );
 
   setUpAll(() {
-    registerFallbackValue(<String, Line>{});
-    registerFallbackValue(Duration.zero);
+    registerFallbackValue(const Duration(days: 7));
+    registerFallbackValue(fixtureBundle);
   });
 
   setUp(() {
     staticService = _MockStatic();
     cacheService = _MockCache();
-    repo = RoutesRepository(staticService: staticService, cacheService: cacheService);
+    repo = RoutesRepository(
+        staticService: staticService, cacheService: cacheService);
   });
 
-  test('returns cached index when present and fresh', () async {
-    when(() => cacheService.read(maxAge: any(named: 'maxAge')))
-        .thenAnswer((_) async => fixtureIndex);
+  test('returns cached routes when bundle is present and fresh', () async {
+    when(() => cacheService.readBundle(maxAge: any(named: 'maxAge')))
+        .thenAnswer((_) async => fixtureBundle);
 
     final result = await repo.getRoutes();
-    expect(result, fixtureIndex);
-    verifyNever(() => staticService.fetchAndParseRoutes());
+    expect(result, fixtureRoutes);
+    verifyNever(() => staticService.fetchAndParseAll());
   });
 
   test('falls back to fetching and writes cache when miss', () async {
-    when(() => cacheService.read(maxAge: any(named: 'maxAge')))
+    when(() => cacheService.readBundle(maxAge: any(named: 'maxAge')))
         .thenAnswer((_) async => null);
-    when(() => staticService.fetchAndParseRoutes())
-        .thenAnswer((_) async => fixtureIndex);
-    when(() => cacheService.write(any())).thenAnswer((_) async {});
+    when(() => staticService.fetchAndParseAll())
+        .thenAnswer((_) async => fixtureStaticBundle);
+    when(() => cacheService.writeBundle(any())).thenAnswer((_) async {});
 
     final result = await repo.getRoutes();
-    expect(result, fixtureIndex);
-    verify(() => cacheService.write(fixtureIndex)).called(1);
+    expect(result, fixtureRoutes);
+    verify(() => cacheService.writeBundle(any())).called(1);
   });
 }

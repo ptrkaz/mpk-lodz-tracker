@@ -5,7 +5,7 @@ import 'data/repositories/routes_repository.dart';
 import 'data/repositories/vehicles_repository.dart';
 import 'data/services/gtfs_rt_service.dart';
 import 'data/services/gtfs_static_service.dart';
-import 'data/services/routes_cache_service.dart';
+import 'data/services/gtfs_cache_service.dart';
 import 'l10n/app_localizations.dart';
 import 'ui/core/app_theme.dart';
 import 'ui/features/filter/view_models/filter_view_model.dart';
@@ -24,7 +24,7 @@ class MpkApp extends StatelessWidget {
   Widget build(BuildContext context) {
     final rtService = GtfsRtService();
     final staticService = GtfsStaticService();
-    final cacheService = RoutesCacheService();
+    final cacheService = GtfsCacheService();
     final vehiclesRepo = VehiclesRepository(service: rtService);
     final routesRepo = RoutesRepository(
       staticService: staticService,
