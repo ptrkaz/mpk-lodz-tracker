@@ -35,6 +35,7 @@ class MpkApp extends StatelessWidget {
     return MultiProvider(
       providers: [
         ChangeNotifierProvider(
+          lazy: false,
           create: (_) => AppLifecycleNotifier()..attach(),
         ),
         ChangeNotifierProxyProvider<AppLifecycleNotifier, MapViewModel>(
