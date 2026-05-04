@@ -6,6 +6,7 @@ import 'package:mpk_lodz_tracker/data/services/gtfs_rt_service.dart';
 import 'package:mpk_lodz_tracker/data/services/gtfs_static_service.dart';
 import 'package:mpk_lodz_tracker/data/services/gtfs_cache_service.dart';
 import 'package:mpk_lodz_tracker/l10n/app_localizations.dart';
+import 'package:mpk_lodz_tracker/ui/core/app_lifecycle_notifier.dart';
 import 'package:mpk_lodz_tracker/ui/features/filter/view_models/filter_view_model.dart';
 import 'package:mpk_lodz_tracker/ui/features/map/view_models/bootstrap_view_model.dart';
 import 'package:mpk_lodz_tracker/ui/features/map/view_models/map_view_model.dart';
@@ -15,29 +16,34 @@ import 'package:mpk_lodz_tracker/ui/features/shell/views/root_shell.dart';
 import 'package:provider/provider.dart';
 
 void main() {
-  Widget wrap(Widget child) => MultiProvider(
-        providers: [
-          ChangeNotifierProvider(
-            create: (_) => MapViewModel(
-              repository: VehiclesRepository(service: GtfsRtService()),
-            ),
+  Widget wrap(Widget child) {
+    final lifecycle = AppLifecycleNotifier(); // unattached — no binding needed
+    return MultiProvider(
+      providers: [
+        ChangeNotifierProvider<AppLifecycleNotifier>.value(value: lifecycle),
+        ChangeNotifierProvider(
+          create: (_) => MapViewModel(
+            repository: VehiclesRepository(service: GtfsRtService()),
+            lifecycle: lifecycle,
           ),
-          ChangeNotifierProvider(
-            create: (_) => BootstrapViewModel(
-              repository: RoutesRepository(
-                staticService: GtfsStaticService(),
-                cacheService: GtfsCacheService(),
-              ),
-            ),
-          ),
-          ChangeNotifierProvider(create: (_) => FilterViewModel()),
-        ],
-        child: MaterialApp(
-          localizationsDelegates: AppLocalizations.localizationsDelegates,
-          supportedLocales: AppLocalizations.supportedLocales,
-          home: child,
         ),
-      );
+        ChangeNotifierProvider(
+          create: (_) => BootstrapViewModel(
+            repository: RoutesRepository(
+              staticService: GtfsStaticService(),
+              cacheService: GtfsCacheService(),
+            ),
+          ),
+        ),
+        ChangeNotifierProvider(create: (_) => FilterViewModel()),
+      ],
+      child: MaterialApp(
+        localizationsDelegates: AppLocalizations.localizationsDelegates,
+        supportedLocales: AppLocalizations.supportedLocales,
+        home: child,
+      ),
+    );
+  }
 
   testWidgets('RootShell shows three nav destinations', (tester) async {
     await tester.pumpWidget(wrap(const RootShell()));

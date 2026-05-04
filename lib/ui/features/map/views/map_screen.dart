@@ -39,7 +39,6 @@ class _MapScreenState extends State<MapScreen> {
     _mapVm = context.read<MapViewModel>();
     _bootVm = context.read<BootstrapViewModel>();
     _filterVm = context.read<FilterViewModel>();
-    _mapVm.attachLifecycle();
     _mapVm.start();
     _mapVm.addListener(_syncLayer);
     _bootVm.addListener(_syncLayer);

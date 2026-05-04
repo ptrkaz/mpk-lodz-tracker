@@ -7,6 +7,7 @@ import 'data/services/gtfs_rt_service.dart';
 import 'data/services/gtfs_static_service.dart';
 import 'data/services/gtfs_cache_service.dart';
 import 'l10n/app_localizations.dart';
+import 'ui/core/app_lifecycle_notifier.dart';
 import 'ui/core/app_theme.dart';
 import 'ui/features/filter/view_models/filter_view_model.dart';
 import 'ui/features/map/view_models/bootstrap_view_model.dart';
@@ -34,7 +35,14 @@ class MpkApp extends StatelessWidget {
     return MultiProvider(
       providers: [
         ChangeNotifierProvider(
-          create: (_) => MapViewModel(repository: vehiclesRepo),
+          create: (_) => AppLifecycleNotifier()..attach(),
+        ),
+        ChangeNotifierProxyProvider<AppLifecycleNotifier, MapViewModel>(
+          create: (ctx) => MapViewModel(
+            repository: vehiclesRepo,
+            lifecycle: ctx.read<AppLifecycleNotifier>(),
+          ),
+          update: (ctx, lifecycle, vm) => vm!,
         ),
         ChangeNotifierProvider(
           create: (_) => BootstrapViewModel(repository: routesRepo),

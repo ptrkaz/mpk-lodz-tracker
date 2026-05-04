@@ -6,6 +6,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:mpk_lodz_tracker/data/repositories/vehicles_repository.dart';
 import 'package:mpk_lodz_tracker/domain/models/vehicle.dart';
+import 'package:mpk_lodz_tracker/ui/core/app_lifecycle_notifier.dart';
 import 'package:mpk_lodz_tracker/ui/core/lodz_constants.dart';
 import 'package:mpk_lodz_tracker/ui/features/map/view_models/map_view_model.dart';
 
@@ -13,16 +14,21 @@ class _MockVehiclesRepo extends Mock implements VehiclesRepository {}
 
 void main() {
   late _MockVehiclesRepo repo;
+  late AppLifecycleNotifier lifecycle;
   final v1 = const Vehicle(id: 'v1', routeId: 'r1', lat: 51.7, lon: 19.4, timestamp: 1);
 
   setUp(() {
     repo = _MockVehiclesRepo();
+    // Unattached notifier: no WidgetsBinding needed in unit tests.
+    lifecycle = AppLifecycleNotifier();
   });
+
+  MapViewModel makeVm() => MapViewModel(repository: repo, lifecycle: lifecycle);
 
   test('start() polls immediately and at the configured interval', () {
     fakeAsync((async) {
       when(() => repo.fetchLatest()).thenAnswer((_) async => [v1]);
-      final vm = MapViewModel(repository: repo);
+      final vm = makeVm();
       vm.start();
 
       async.flushMicrotasks();
@@ -38,7 +44,7 @@ void main() {
 
   test('replace updates vehicles and lastUpdate', () async {
     when(() => repo.fetchLatest()).thenAnswer((_) async => [v1]);
-    final vm = MapViewModel(repository: repo);
+    final vm = makeVm();
     await vm.refreshOnce();
     expect(vm.vehicles, [v1]);
     expect(vm.lastUpdate, isNotNull);
@@ -47,7 +53,7 @@ void main() {
   test('stop() halts polling', () {
     fakeAsync((async) {
       when(() => repo.fetchLatest()).thenAnswer((_) async => const []);
-      final vm = MapViewModel(repository: repo);
+      final vm = makeVm();
       vm.start();
       async.flushMicrotasks();
       vm.stop();
@@ -60,7 +66,7 @@ void main() {
   test('start() is idempotent under repeated calls', () {
     fakeAsync((async) {
       when(() => repo.fetchLatest()).thenAnswer((_) async => const []);
-      final vm = MapViewModel(repository: repo);
+      final vm = makeVm();
       vm.start();
       vm.start();
       vm.start();
@@ -73,17 +79,17 @@ void main() {
   test('lifecycle pause stops polling, resume restarts it', () {
     fakeAsync((async) {
       when(() => repo.fetchLatest()).thenAnswer((_) async => const []);
-      final vm = MapViewModel(repository: repo);
+      final vm = makeVm();
       vm.start();
       async.flushMicrotasks();
       verify(() => repo.fetchLatest()).called(1);
 
-      vm.didChangeAppLifecycleState(AppLifecycleState.paused);
+      lifecycle.didChangeAppLifecycleState(AppLifecycleState.paused);
       async.elapse(LodzConstants.pollInterval * 2);
       async.flushMicrotasks();
       verifyNever(() => repo.fetchLatest());
 
-      vm.didChangeAppLifecycleState(AppLifecycleState.resumed);
+      lifecycle.didChangeAppLifecycleState(AppLifecycleState.resumed);
       async.flushMicrotasks();
       verify(() => repo.fetchLatest()).called(1);
 
@@ -94,7 +100,7 @@ void main() {
   test('refreshOnce after dispose does not notify listeners', () async {
     final completer = Completer<List<Vehicle>>();
     when(() => repo.fetchLatest()).thenAnswer((_) => completer.future);
-    final vm = MapViewModel(repository: repo);
+    final vm = makeVm();
     var notifications = 0;
     vm.addListener(() => notifications++);
 

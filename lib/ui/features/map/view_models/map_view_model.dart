@@ -2,21 +2,36 @@ import 'dart:async';
 import 'package:flutter/widgets.dart';
 import '../../../../data/repositories/vehicles_repository.dart';
 import '../../../../domain/models/vehicle.dart';
+import '../../../core/app_lifecycle_notifier.dart';
 import '../../../core/lodz_constants.dart';
 
-class MapViewModel extends ChangeNotifier with WidgetsBindingObserver {
-  MapViewModel({required VehiclesRepository repository}) : _repo = repository;
+class MapViewModel extends ChangeNotifier {
+  MapViewModel({
+    required VehiclesRepository repository,
+    required AppLifecycleNotifier lifecycle,
+  })  : _repo = repository,
+        _lifecycle = lifecycle {
+    _lifecycle.addListener(_onLifecycle);
+  }
 
   final VehiclesRepository _repo;
+  final AppLifecycleNotifier _lifecycle;
   Timer? _timer;
   bool _disposed = false;
-  bool _lifecycleAttached = false;
 
   List<Vehicle> _vehicles = <Vehicle>[];
   DateTime? _lastUpdate;
 
   List<Vehicle> get vehicles => _vehicles;
   DateTime? get lastUpdate => _lastUpdate;
+
+  void _onLifecycle() {
+    if (_lifecycle.isResumed) {
+      start();
+    } else {
+      stop();
+    }
+  }
 
   void start() {
     if (_timer != null) return;
@@ -42,33 +57,10 @@ class MapViewModel extends ChangeNotifier with WidgetsBindingObserver {
   }
 
   @override
-  void didChangeAppLifecycleState(AppLifecycleState state) {
-    if (state == AppLifecycleState.resumed) {
-      start();
-    } else if (state == AppLifecycleState.paused ||
-        state == AppLifecycleState.inactive ||
-        state == AppLifecycleState.hidden) {
-      stop();
-    }
-  }
-
-  void attachLifecycle() {
-    if (_lifecycleAttached) return;
-    WidgetsBinding.instance.addObserver(this);
-    _lifecycleAttached = true;
-  }
-
-  void detachLifecycle() {
-    if (!_lifecycleAttached) return;
-    WidgetsBinding.instance.removeObserver(this);
-    _lifecycleAttached = false;
-  }
-
-  @override
   void dispose() {
     _disposed = true;
     stop();
-    detachLifecycle();
+    _lifecycle.removeListener(_onLifecycle);
     super.dispose();
   }
 }
