@@ -89,4 +89,14 @@ void main() {
     vm.clearSelection();
     expect(vm.selected, isNull);
   });
+
+  test('init after dispose does not crash', () async {
+    final vm = NearbyStopsViewModel(
+      stopsRepo: StopsRepository.test(stops),
+      location: _FakeLocation(),
+      lastFixStore: _NoopFixStore(),
+    );
+    vm.dispose();
+    await vm.init(); // must not throw
+  });
 }

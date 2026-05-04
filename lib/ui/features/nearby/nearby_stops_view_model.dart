@@ -134,6 +134,7 @@ class NearbyStopsViewModel extends ChangeNotifier {
       case LocationPermission.whileInUse:
         _setStatus(LocationStatus.granted);
         await _stops.getStops();
+        if (_disposed) return;
         _subscribe();
         break;
       case LocationPermission.unableToDetermine:
@@ -184,6 +185,7 @@ class NearbyStopsViewModel extends ChangeNotifier {
   }
 
   void _recomputeNearby() {
+    if (_disposed) return;
     final fix = _lastFix;
     if (fix == null) return;
     _nearby = _stops.nearby(
@@ -195,6 +197,7 @@ class NearbyStopsViewModel extends ChangeNotifier {
   }
 
   void _setStatus(LocationStatus s) {
+    if (_disposed) return;
     _status = s;
     notifyListeners();
   }
