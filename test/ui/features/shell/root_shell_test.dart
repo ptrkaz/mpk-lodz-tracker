@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:geolocator/geolocator.dart';
 import 'package:mpk_lodz_tracker/data/repositories/routes_repository.dart';
 import 'package:mpk_lodz_tracker/data/repositories/stops_repository.dart';
 import 'package:mpk_lodz_tracker/data/repositories/vehicles_repository.dart';
@@ -13,10 +14,42 @@ import 'package:mpk_lodz_tracker/ui/core/app_lifecycle_notifier.dart';
 import 'package:mpk_lodz_tracker/ui/features/filter/view_models/filter_view_model.dart';
 import 'package:mpk_lodz_tracker/ui/features/map/view_models/bootstrap_view_model.dart';
 import 'package:mpk_lodz_tracker/ui/features/map/view_models/map_view_model.dart';
+import 'package:mpk_lodz_tracker/ui/features/nearby/nearby_stops_view_model.dart';
 import 'package:mpk_lodz_tracker/ui/features/shell/views/favorites_screen.dart';
 import 'package:mpk_lodz_tracker/ui/features/shell/views/lines_screen.dart';
 import 'package:mpk_lodz_tracker/ui/features/shell/views/root_shell.dart';
 import 'package:provider/provider.dart';
+
+// ---------------------------------------------------------------------------
+// Minimal fakes so NearbyStopsViewModel never tries to touch the OS.
+// ---------------------------------------------------------------------------
+
+class _NoOpLocation implements LocationGateway {
+  const _NoOpLocation();
+
+  @override
+  Future<bool> isLocationServiceEnabled() async => false;
+  @override
+  Future<LocationPermission> checkPermission() async =>
+      LocationPermission.denied;
+  @override
+  Future<LocationPermission> requestPermission() async =>
+      LocationPermission.denied;
+  @override
+  Stream<Position> positionStream({double distanceFilter = 25}) =>
+      const Stream.empty();
+  @override
+  Future<Position?> getLastKnown() async => null;
+  @override
+  Future<void> openAppSettings() async {}
+}
+
+class _NoOpFixStore implements LastFixStore {
+  @override
+  Future<({double lat, double lon})?> read() async => null;
+  @override
+  Future<void> write(Position pos) async {}
+}
 
 void main() {
   Widget wrap(Widget child) {
@@ -41,6 +74,14 @@ void main() {
           ),
         ),
         ChangeNotifierProvider(create: (_) => FilterViewModel()),
+        ChangeNotifierProvider<NearbyStopsViewModel>(
+          create: (_) => NearbyStopsViewModel(
+            stopsRepo: StopsRepository.test(const <String, Stop>{}),
+            location: const _NoOpLocation(),
+            lastFixStore: _NoOpFixStore(),
+          ),
+          // Do NOT call init() — it would trigger geolocator on a test runner.
+        ),
       ],
       child: MaterialApp(
         localizationsDelegates: AppLocalizations.localizationsDelegates,

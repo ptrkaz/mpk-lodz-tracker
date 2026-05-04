@@ -19,6 +19,7 @@ import 'ui/core/lodz_constants.dart';
 import 'ui/features/filter/view_models/filter_view_model.dart';
 import 'ui/features/map/view_models/bootstrap_view_model.dart';
 import 'ui/features/map/view_models/map_view_model.dart';
+import 'ui/features/nearby/nearby_stops_view_model.dart';
 import 'ui/features/shell/views/root_shell.dart';
 
 void main() {
@@ -96,6 +97,14 @@ class MpkApp extends StatelessWidget {
           ),
         ),
         ChangeNotifierProvider(create: (_) => FilterViewModel()),
+        ChangeNotifierProvider<NearbyStopsViewModel>(
+          lazy: false,
+          create: (ctx) => NearbyStopsViewModel(
+            stopsRepo: ctx.read<StopsRepository>(),
+            location: GeolocatorGateway(),
+            lastFixStore: PrefsLastFixStore(),
+          )..init(),
+        ),
       ],
       child: MaterialApp(
         title: 'MPK Łódź',
