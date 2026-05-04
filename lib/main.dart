@@ -99,8 +99,8 @@ class MpkApp extends StatelessWidget {
         ChangeNotifierProvider(create: (_) => FilterViewModel()),
         ChangeNotifierProvider<NearbyStopsViewModel>(
           lazy: false,
-          create: (ctx) => NearbyStopsViewModel(
-            stopsRepo: ctx.read<StopsRepository>(),
+          create: (_) => NearbyStopsViewModel(
+            stopsRepo: stopsRepo,
             location: GeolocatorGateway(),
             lastFixStore: PrefsLastFixStore(),
           )..init(),
