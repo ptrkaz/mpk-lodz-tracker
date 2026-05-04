@@ -45,4 +45,32 @@ void main() {
     final result = repo.nearby(_pos(51.76, 19.45), radiusM: 5000, limit: 2);
     expect(result, hasLength(2));
   });
+
+  test('nearbyWithDistances sorts by ascending distance', () {
+    final repo = StopsRepository.test(idx);
+    final result = repo.nearbyWithDistances(
+        _pos(51.7600, 19.4500),
+        radiusM: 500,
+        limit: 10);
+    expect(result.map((e) => e.stop.id), ['a', 'd', 'b']);
+    // distances should be non-decreasing
+    for (var i = 1; i < result.length; i++) {
+      expect(result[i].distanceM, greaterThanOrEqualTo(result[i - 1].distanceM));
+    }
+  });
+
+  test('nearbyWithDistances distances are reasonable', () {
+    final repo = StopsRepository.test(idx);
+    final result = repo.nearbyWithDistances(
+        _pos(51.7600, 19.4500),
+        radiusM: 500,
+        limit: 10);
+    final byId = {for (final e in result) e.stop.id: e.distanceM};
+    // 'a' is at the query point — distance ~0
+    expect(byId['a']!, lessThan(1.0));
+    // 'd' is ~14m away
+    expect(byId['d']!, closeTo(14, 3));
+    // 'b' is ~111m away
+    expect(byId['b']!, closeTo(111, 10));
+  });
 }

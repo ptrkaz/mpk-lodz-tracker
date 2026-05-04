@@ -6,6 +6,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../../data/repositories/stops_repository.dart';
 import '../../../domain/models/stop.dart';
+import '../../../domain/models/vehicle.dart';
 import '../../core/lodz_constants.dart';
 
 enum LocationStatus { unknown, granted, denied, deniedForever, serviceDisabled }
@@ -90,12 +91,18 @@ class NearbyStopsViewModel extends ChangeNotifier {
   SheetSnap _snap = SheetSnap.peek;
   StreamSubscription<Position>? _sub;
   bool _disposed = false;
+  Map<String, double> _distancesByStopId = const {};
+  Map<String, List<({String number, VehicleType type})>> _linesByStopId =
+      const {};
 
   LocationStatus get status => _status;
   Position? get lastFix => _lastFix;
   List<Stop> get nearby => _nearby;
   Stop? get selected => _selected;
   SheetSnap get snap => _snap;
+  Map<String, double> get distancesByStopId => _distancesByStopId;
+  Map<String, List<({String number, VehicleType type})>> get linesByStopId =>
+      _linesByStopId;
 
   Future<void> init() async {
     final stored = await _fixStore.read();
@@ -188,11 +195,15 @@ class NearbyStopsViewModel extends ChangeNotifier {
     if (_disposed) return;
     final fix = _lastFix;
     if (fix == null) return;
-    _nearby = _stops.nearby(
+    final results = _stops.nearbyWithDistances(
       fix,
       radiusM: LodzConstants.nearbyRadiusM,
       limit: LodzConstants.nearbyLimit,
     );
+    _nearby = results.map((e) => e.stop).toList();
+    _distancesByStopId = {for (final e in results) e.stop.id: e.distanceM};
+    // Lines join requires stop_times.txt (not loaded in v1); leave empty.
+    _linesByStopId = const {};
     notifyListeners();
   }
 

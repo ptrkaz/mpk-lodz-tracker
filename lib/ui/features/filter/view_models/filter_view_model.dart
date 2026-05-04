@@ -7,6 +7,9 @@ class FilterViewModel extends ChangeNotifier {
   String _query = '';
 
   Set<String> get selectedRouteIds => Set.unmodifiable(_selected);
+
+  /// Alias used by NearbyStopsSheet to feed active filters into StopDetailViewModel.
+  Set<String> get activeRouteIds => selectedRouteIds;
   VehicleType get activeTab => _tab;
   String get query => _query;
 

@@ -49,6 +49,15 @@ class StopsRepository {
     Position pos, {
     double radiusM = LodzConstants.nearbyRadiusM,
     int limit = LodzConstants.nearbyLimit,
+  }) =>
+      nearbyWithDistances(pos, radiusM: radiusM, limit: limit)
+          .map((e) => e.stop)
+          .toList();
+
+  List<({Stop stop, double distanceM})> nearbyWithDistances(
+    Position pos, {
+    double radiusM = LodzConstants.nearbyRadiusM,
+    int limit = LodzConstants.nearbyLimit,
   }) {
     final idx = _index;
     if (idx == null) return const [];
@@ -58,7 +67,7 @@ class StopsRepository {
       if (d <= radiusM) scored.add(_Scored(s, d));
     }
     scored.sort((a, b) => a.distanceM.compareTo(b.distanceM));
-    return scored.take(limit).map((e) => e.stop).toList();
+    return scored.take(limit).map((e) => (stop: e.stop, distanceM: e.distanceM)).toList();
   }
 
   static double _haversine(double lat1, double lon1, double lat2, double lon2) {

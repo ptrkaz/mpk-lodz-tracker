@@ -99,4 +99,38 @@ void main() {
     vm.dispose();
     await vm.init(); // must not throw
   });
+
+  test('distancesByStopId is populated after fix', () {
+    fakeAsync((async) {
+      final loc = _FakeLocation();
+      final vm = NearbyStopsViewModel(
+        stopsRepo: StopsRepository.test(stops),
+        location: loc,
+        lastFixStore: _NoopFixStore(),
+      );
+      vm.init();
+      async.elapse(const Duration(milliseconds: 1));
+      loc.controller.add(_pos(51.760, 19.450));
+      async.elapse(const Duration(milliseconds: 1));
+      expect(vm.distancesByStopId, isNotEmpty);
+      expect(vm.distancesByStopId.containsKey('a'), isTrue);
+      expect(vm.distancesByStopId['a']!, lessThan(1.0));
+    });
+  });
+
+  test('linesByStopId is empty map (v1 — no stop_times join)', () {
+    fakeAsync((async) {
+      final loc = _FakeLocation();
+      final vm = NearbyStopsViewModel(
+        stopsRepo: StopsRepository.test(stops),
+        location: loc,
+        lastFixStore: _NoopFixStore(),
+      );
+      vm.init();
+      async.elapse(const Duration(milliseconds: 1));
+      loc.controller.add(_pos(51.760, 19.450));
+      async.elapse(const Duration(milliseconds: 1));
+      expect(vm.linesByStopId, isEmpty);
+    });
+  });
 }

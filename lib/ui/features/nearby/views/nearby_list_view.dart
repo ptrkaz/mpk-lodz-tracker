@@ -16,6 +16,7 @@ class NearbyListView extends StatelessWidget {
     required this.linesByStopId,
     required this.distancesByStopId,
     required this.onTapStop,
+    this.scrollController,
   });
 
   final List<Stop> stops;
@@ -23,10 +24,16 @@ class NearbyListView extends StatelessWidget {
   final Map<String, double> distancesByStopId;
   final ValueChanged<Stop> onTapStop;
 
+  /// When provided (e.g. from [DraggableScrollableSheet]), this controller is
+  /// forwarded to the inner [ListView] so the draggable sheet controls
+  /// scrolling. When null the [ListView] manages its own scroll.
+  final ScrollController? scrollController;
+
   @override
   Widget build(BuildContext context) {
     final l = AppLocalizations.of(context);
-    return Column(
+    final header = Column(
+      mainAxisSize: MainAxisSize.min,
       children: [
         const SheetHandle(),
         Padding(
@@ -41,28 +48,44 @@ class NearbyListView extends StatelessWidget {
             ),
           ),
         ),
-        Expanded(
-          child: stops.isEmpty
-              ? Center(child: Text(l.nearbyEmptyNoStops))
-              : ListView.separated(
-                  padding: EdgeInsets.zero,
-                  itemCount: stops.length,
-                  separatorBuilder: (context, index) =>
-                      const Divider(height: 1, color: LodzColors.outlineVariant),
-                  itemBuilder: (_, i) {
-                    final s = stops[i];
-                    final lines = linesByStopId[s.id] ?? const [];
-                    return NearbyListRow(
-                      stop: s,
-                      lineNumbers: [for (final l in lines) l.number],
-                      lineTypes: [for (final l in lines) l.type],
-                      distanceM: distancesByStopId[s.id] ?? 0,
-                      onTap: () => onTapStop(s),
-                    );
-                  },
-                ),
-        ),
       ],
+    );
+
+    if (stops.isEmpty) {
+      // Use a single-item ListView so the scrollController (if provided)
+      // is still honoured and layout stays bounded.
+      return ListView(
+        controller: scrollController,
+        shrinkWrap: scrollController == null,
+        children: [
+          header,
+          Padding(
+            padding: const EdgeInsets.all(LodzSpacing.lg),
+            child: Center(child: Text(l.nearbyEmptyNoStops)),
+          ),
+        ],
+      );
+    }
+
+    return ListView.separated(
+      controller: scrollController,
+      shrinkWrap: scrollController == null,
+      padding: EdgeInsets.zero,
+      itemCount: stops.length + 1, // +1 for header
+      separatorBuilder: (_, index) =>
+          index == 0 ? const SizedBox.shrink() : const Divider(height: 1, color: LodzColors.outlineVariant),
+      itemBuilder: (_, i) {
+        if (i == 0) return header;
+        final s = stops[i - 1];
+        final lines = linesByStopId[s.id] ?? const [];
+        return NearbyListRow(
+          stop: s,
+          lineNumbers: [for (final l in lines) l.number],
+          lineTypes: [for (final l in lines) l.type],
+          distanceM: distancesByStopId[s.id] ?? 0,
+          onTap: () => onTapStop(s),
+        );
+      },
     );
   }
 }
