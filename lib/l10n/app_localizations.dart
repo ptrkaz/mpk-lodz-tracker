@@ -225,6 +225,90 @@ abstract class AppLocalizations {
   /// In pl, this message translates to:
   /// **'Wkrótce'**
   String get screenComingSoon;
+
+  /// No description provided for @nearbyStopsCount.
+  ///
+  /// In pl, this message translates to:
+  /// **'{count, plural, one{1 przystanek w pobliżu} few{{count} przystanki w pobliżu} many{{count} przystanków w pobliżu} other{{count} przystanków w pobliżu}}'**
+  String nearbyStopsCount(int count);
+
+  /// No description provided for @nearbyEmptyNoStops.
+  ///
+  /// In pl, this message translates to:
+  /// **'Brak przystanków w promieniu 500 m'**
+  String get nearbyEmptyNoStops;
+
+  /// No description provided for @nearbyEmptyNoDepartures.
+  ///
+  /// In pl, this message translates to:
+  /// **'Brak nadchodzących odjazdów'**
+  String get nearbyEmptyNoDepartures;
+
+  /// No description provided for @nearbyWaitingForGps.
+  ///
+  /// In pl, this message translates to:
+  /// **'Czekam na sygnał GPS…'**
+  String get nearbyWaitingForGps;
+
+  /// No description provided for @nearbyCheckingLocation.
+  ///
+  /// In pl, this message translates to:
+  /// **'Sprawdzam lokalizację…'**
+  String get nearbyCheckingLocation;
+
+  /// No description provided for @permissionCtaTitleDenied.
+  ///
+  /// In pl, this message translates to:
+  /// **'Włącz lokalizację, by zobaczyć przystanki w pobliżu'**
+  String get permissionCtaTitleDenied;
+
+  /// No description provided for @permissionCtaButtonGrant.
+  ///
+  /// In pl, this message translates to:
+  /// **'Włącz lokalizację'**
+  String get permissionCtaButtonGrant;
+
+  /// No description provided for @permissionCtaButtonSettings.
+  ///
+  /// In pl, this message translates to:
+  /// **'Otwórz ustawienia'**
+  String get permissionCtaButtonSettings;
+
+  /// No description provided for @permissionCtaTitleService.
+  ///
+  /// In pl, this message translates to:
+  /// **'Włącz usługi lokalizacji w ustawieniach systemu'**
+  String get permissionCtaTitleService;
+
+  /// No description provided for @walkMinutes.
+  ///
+  /// In pl, this message translates to:
+  /// **'~{n} min'**
+  String walkMinutes(int n);
+
+  /// No description provided for @metersAway.
+  ///
+  /// In pl, this message translates to:
+  /// **'{n} m'**
+  String metersAway(int n);
+
+  /// No description provided for @lastUpdatedAt.
+  ///
+  /// In pl, this message translates to:
+  /// **'ostatnia aktualizacja {time}'**
+  String lastUpdatedAt(String time);
+
+  /// No description provided for @delayLate.
+  ///
+  /// In pl, this message translates to:
+  /// **'+{n} min'**
+  String delayLate(int n);
+
+  /// No description provided for @delayEarly.
+  ///
+  /// In pl, this message translates to:
+  /// **'−{n} min'**
+  String delayEarly(int n);
 }
 
 class _AppLocalizationsDelegate

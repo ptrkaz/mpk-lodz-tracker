@@ -93,4 +93,68 @@ class AppLocalizationsPl extends AppLocalizations {
 
   @override
   String get screenComingSoon => 'Wkrótce';
+
+  @override
+  String nearbyStopsCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count przystanków w pobliżu',
+      many: '$count przystanków w pobliżu',
+      few: '$count przystanki w pobliżu',
+      one: '1 przystanek w pobliżu',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get nearbyEmptyNoStops => 'Brak przystanków w promieniu 500 m';
+
+  @override
+  String get nearbyEmptyNoDepartures => 'Brak nadchodzących odjazdów';
+
+  @override
+  String get nearbyWaitingForGps => 'Czekam na sygnał GPS…';
+
+  @override
+  String get nearbyCheckingLocation => 'Sprawdzam lokalizację…';
+
+  @override
+  String get permissionCtaTitleDenied =>
+      'Włącz lokalizację, by zobaczyć przystanki w pobliżu';
+
+  @override
+  String get permissionCtaButtonGrant => 'Włącz lokalizację';
+
+  @override
+  String get permissionCtaButtonSettings => 'Otwórz ustawienia';
+
+  @override
+  String get permissionCtaTitleService =>
+      'Włącz usługi lokalizacji w ustawieniach systemu';
+
+  @override
+  String walkMinutes(int n) {
+    return '~$n min';
+  }
+
+  @override
+  String metersAway(int n) {
+    return '$n m';
+  }
+
+  @override
+  String lastUpdatedAt(String time) {
+    return 'ostatnia aktualizacja $time';
+  }
+
+  @override
+  String delayLate(int n) {
+    return '+$n min';
+  }
+
+  @override
+  String delayEarly(int n) {
+    return '−$n min';
+  }
 }
