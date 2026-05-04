@@ -64,6 +64,10 @@ Visual style follows the Stitch "Łódź Urban Transit System" design (`stitch_c
 
 Carryover from the original RN spec — marker tap callout, offline indicator (50% opacity + toast), hide locate FAB on permission denial, `SystemUiOverlayStyle` polish for Android. Plus: the GTFS-RT decoder passes through vehicles with `lat=0/lon=0` (real fixture-data quirk); a small filter at the decoder level would tighten correctness. Bearing rotation on markers is now wired (Stitch restyle T11) — vehicles missing `bearing` simply don't render the arrow, which is intentional.
 
+- **Nearby-stops v1: empty `linesByStopId`.** `NearbyListView` rows render no line chips because `stop_times.txt` (153 MB) is not loaded. The row layout falls back to name + walk time + distance only. Loading a slim `(trip_id, stop_id)` projection would be enough.
+- **Nearby-stops v1: tap-on-dot deferred.** `StopMarkersLayer` renders the cyan circles when the sheet is expanded, but the per-feature tap callback (`onFeatureTapped`) is not yet wired. User must tap a row in the sheet to open the detail view. Tracking the maplibre_gl Flutter binding for a clean per-source query API.
+- **Nearby-stops v1: camera padding approximation.** `CameraUpdate.padding` is not exposed in the current `maplibre_gl` Flutter binding, so `LocateFab` re-centering uses a lat-degree shift to compensate for the sheet's bottom occlusion. Visible as a brief double-pan at high zoom.
+
 ## Iterating on this codebase
 
 - After editing `lib/l10n/app_pl.arb`, run `flutter gen-l10n` and commit the regenerated `lib/l10n/app_localizations*.dart`.
