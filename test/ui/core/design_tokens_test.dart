@@ -8,6 +8,6 @@ void main() {
   });
 
   test('LodzColors.success is set', () {
-    expect(LodzColors.success.value, isNot(0));
+    expect(LodzColors.success.toARGB32(), isNot(0));
   });
 }

@@ -95,6 +95,9 @@ class AppLocalizationsPl extends AppLocalizations {
   String get screenComingSoon => 'Wkrótce';
 
   @override
+  String get favoritesEmpty => 'Zapisane przystanki pojawią się tutaj';
+
+  @override
   String nearbyStopsCount(int count) {
     String _temp0 = intl.Intl.pluralLogic(
       count,

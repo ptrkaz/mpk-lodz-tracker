@@ -24,9 +24,13 @@ void main() {
     repo.addListener(() => notifications++);
 
     svc.next = const [
-      TripUpdate(tripId: 't1', delaySec: 30, stopTimeUpdates: [
-        StopTimeUpdate(stopId: 's1', etaUnixSec: 1, delaySec: 0),
-      ]),
+      TripUpdate(
+        tripId: 't1',
+        delaySec: 30,
+        stopTimeUpdates: [
+          StopTimeUpdate(stopId: 's1', etaUnixSec: 1, delaySec: 0),
+        ],
+      ),
     ];
     await repo.refresh();
     expect(repo.byTripId.containsKey('t1'), isTrue);
@@ -37,9 +41,13 @@ void main() {
     final svc = _FakeService();
     final repo = TripUpdatesRepository(service: svc);
     svc.next = const [
-      TripUpdate(tripId: 't1', delaySec: 0, stopTimeUpdates: [
-        StopTimeUpdate(stopId: 's1', etaUnixSec: 1, delaySec: 0),
-      ]),
+      TripUpdate(
+        tripId: 't1',
+        delaySec: 0,
+        stopTimeUpdates: [
+          StopTimeUpdate(stopId: 's1', etaUnixSec: 1, delaySec: 0),
+        ],
+      ),
     ];
     await repo.refresh();
     int notifications = 0;

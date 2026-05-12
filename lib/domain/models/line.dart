@@ -1,11 +1,7 @@
 import 'vehicle.dart';
 
 class Line {
-  const Line({
-    required this.routeId,
-    required this.number,
-    required this.type,
-  });
+  const Line({required this.routeId, required this.number, required this.type});
 
   final String routeId;
   final String number;

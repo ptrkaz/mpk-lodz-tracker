@@ -6,17 +6,15 @@ import '../../../core/design_tokens.dart';
 import '../../filter/views/line_chip.dart';
 
 class DepartureRow extends StatelessWidget {
-  const DepartureRow({
-    super.key,
-    required this.departure,
-    required this.now,
-  });
+  const DepartureRow({super.key, required this.departure, required this.now});
 
   final Departure departure;
   final DateTime now;
 
   String _eta() {
-    final eta = DateTime.fromMillisecondsSinceEpoch(departure.etaUnixSec * 1000);
+    final eta = DateTime.fromMillisecondsSinceEpoch(
+      departure.etaUnixSec * 1000,
+    );
     final diffSec = eta.difference(now).inSeconds;
     final diffMin = (diffSec / 60).round();
     if (diffMin < 60) return '$diffMin min';

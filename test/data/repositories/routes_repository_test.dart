@@ -4,6 +4,7 @@ import 'package:mpk_lodz_tracker/data/repositories/routes_repository.dart';
 import 'package:mpk_lodz_tracker/data/services/gtfs_cache_service.dart';
 import 'package:mpk_lodz_tracker/data/services/gtfs_static_service.dart';
 import 'package:mpk_lodz_tracker/domain/models/line.dart';
+import 'package:mpk_lodz_tracker/domain/models/route_shape.dart';
 import 'package:mpk_lodz_tracker/domain/models/stop.dart';
 import 'package:mpk_lodz_tracker/domain/models/trip_info.dart';
 import 'package:mpk_lodz_tracker/domain/models/vehicle.dart';
@@ -24,11 +25,21 @@ void main() {
     routes: fixtureRoutes,
     stops: <String, Stop>{},
     trips: <String, TripInfo>{},
+    routeShapes: const {
+      'r1': RouteShape(
+        routeId: 'r1',
+        points: [
+          ShapePoint(lat: 51.7, lon: 19.4),
+          ShapePoint(lat: 51.8, lon: 19.5),
+        ],
+      ),
+    },
   );
   final fixtureStaticBundle = GtfsStaticBundle(
     routes: fixtureRoutes,
     stops: <String, Stop>{},
     trips: <String, TripInfo>{},
+    routeShapes: fixtureBundle.routeShapes,
   );
 
   setUpAll(() {
@@ -40,12 +51,15 @@ void main() {
     staticService = _MockStatic();
     cacheService = _MockCache();
     repo = RoutesRepository(
-        staticService: staticService, cacheService: cacheService);
+      staticService: staticService,
+      cacheService: cacheService,
+    );
   });
 
   test('returns cached routes when bundle is present and fresh', () async {
-    when(() => cacheService.readBundle(maxAge: any(named: 'maxAge')))
-        .thenAnswer((_) async => fixtureBundle);
+    when(
+      () => cacheService.readBundle(maxAge: any(named: 'maxAge')),
+    ).thenAnswer((_) async => fixtureBundle);
 
     final result = await repo.getRoutes();
     expect(result, fixtureRoutes);
@@ -53,14 +67,27 @@ void main() {
   });
 
   test('falls back to fetching and writes cache when miss', () async {
-    when(() => cacheService.readBundle(maxAge: any(named: 'maxAge')))
-        .thenAnswer((_) async => null);
-    when(() => staticService.fetchAndParseAll())
-        .thenAnswer((_) async => fixtureStaticBundle);
+    when(
+      () => cacheService.readBundle(maxAge: any(named: 'maxAge')),
+    ).thenAnswer((_) async => null);
+    when(
+      () => staticService.fetchAndParseAll(),
+    ).thenAnswer((_) async => fixtureStaticBundle);
     when(() => cacheService.writeBundle(any())).thenAnswer((_) async {});
 
     final result = await repo.getRoutes();
     expect(result, fixtureRoutes);
     verify(() => cacheService.writeBundle(any())).called(1);
+  });
+
+  test('returns route shapes from cached static bundle', () async {
+    when(
+      () => cacheService.readBundle(maxAge: any(named: 'maxAge')),
+    ).thenAnswer((_) async => fixtureBundle);
+
+    final result = await repo.getRouteShapes();
+
+    expect(result['r1']!.points, hasLength(2));
+    verifyNever(() => staticService.fetchAndParseAll());
   });
 }

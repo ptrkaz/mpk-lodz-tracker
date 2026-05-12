@@ -2,6 +2,7 @@ import 'dart:io';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mpk_lodz_tracker/data/services/gtfs_cache_service.dart';
 import 'package:mpk_lodz_tracker/domain/models/line.dart';
+import 'package:mpk_lodz_tracker/domain/models/route_shape.dart';
 import 'package:mpk_lodz_tracker/domain/models/stop.dart';
 import 'package:mpk_lodz_tracker/domain/models/trip_info.dart';
 import 'package:mpk_lodz_tracker/domain/models/vehicle.dart';
@@ -13,9 +14,20 @@ void main() {
     final dir = _tmp();
     final svc = GtfsCacheService(directoryProvider: () async => dir);
     final bundle = GtfsCachedBundle(
-      routes: {'r1': const Line(routeId: 'r1', number: '12', type: VehicleType.tram)},
+      routes: {
+        'r1': const Line(routeId: 'r1', number: '12', type: VehicleType.tram),
+      },
       stops: {'s1': const Stop(id: 's1', name: 'A', lat: 51.7, lon: 19.4)},
       trips: {'t1': const TripInfo(tripId: 't1', routeId: 'r1', headsign: 'X')},
+      routeShapes: const {
+        'r1': RouteShape(
+          routeId: 'r1',
+          points: [
+            ShapePoint(lat: 51.7, lon: 19.4),
+            ShapePoint(lat: 51.8, lon: 19.5),
+          ],
+        ),
+      },
     );
     await svc.writeBundle(bundle);
     final back = await svc.readBundle(maxAge: const Duration(days: 1));
@@ -23,26 +35,25 @@ void main() {
     expect(back!.routes['r1']!.number, '12');
     expect(back.stops['s1']!.name, 'A');
     expect(back.trips['t1']!.headsign, 'X');
+    expect(back.routeShapes['r1']!.points.last.lon, 19.5);
   });
 
   test('readBundle returns null when any snapshot missing', () async {
     final dir = _tmp();
     final svc = GtfsCacheService(directoryProvider: () async => dir);
-    expect(
-      await svc.readBundle(maxAge: const Duration(days: 1)),
-      isNull,
-    );
+    expect(await svc.readBundle(maxAge: const Duration(days: 1)), isNull);
   });
 
   test('readBundle returns null when oldest snapshot is stale', () async {
     final dir = _tmp();
     final svc = GtfsCacheService(directoryProvider: () async => dir);
-    await svc.writeBundle(GtfsCachedBundle(routes: {}, stops: {}, trips: {}));
-    final tripsFile = File('${dir.path}/trips.json');
-    await tripsFile.setLastModified(DateTime.now().subtract(const Duration(days: 30)));
-    expect(
-      await svc.readBundle(maxAge: const Duration(days: 7)),
-      isNull,
+    await svc.writeBundle(
+      GtfsCachedBundle(routes: {}, stops: {}, trips: {}, routeShapes: {}),
     );
+    final tripsFile = File('${dir.path}/trips.json');
+    await tripsFile.setLastModified(
+      DateTime.now().subtract(const Duration(days: 30)),
+    );
+    expect(await svc.readBundle(maxAge: const Duration(days: 7)), isNull);
   });
 }

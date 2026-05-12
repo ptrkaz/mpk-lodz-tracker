@@ -5,6 +5,7 @@ import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:mpk_lodz_tracker/data/repositories/vehicles_repository.dart';
+import 'package:mpk_lodz_tracker/domain/models/line.dart';
 import 'package:mpk_lodz_tracker/domain/models/vehicle.dart';
 import 'package:mpk_lodz_tracker/ui/core/app_lifecycle_notifier.dart';
 import 'package:mpk_lodz_tracker/ui/core/lodz_constants.dart';
@@ -15,7 +16,13 @@ class _MockVehiclesRepo extends Mock implements VehiclesRepository {}
 void main() {
   late _MockVehiclesRepo repo;
   late AppLifecycleNotifier lifecycle;
-  final v1 = const Vehicle(id: 'v1', routeId: 'r1', lat: 51.7, lon: 19.4, timestamp: 1);
+  final v1 = const Vehicle(
+    id: 'v1',
+    routeId: 'r1',
+    lat: 51.7,
+    lon: 19.4,
+    timestamp: 1,
+  );
 
   setUp(() {
     repo = _MockVehiclesRepo();
@@ -49,6 +56,75 @@ void main() {
     expect(vm.vehicles, [v1]);
     expect(vm.lastUpdate, isNotNull);
   });
+
+  test(
+    'selectVehicle selects every visible vehicle sharing the tapped line number',
+    () async {
+      const sameLineA = Vehicle(
+        id: 'a',
+        routeId: 'route-8-a',
+        lat: 51.7,
+        lon: 19.4,
+        timestamp: 1,
+      );
+      const sameLineB = Vehicle(
+        id: 'b',
+        routeId: 'route-8-b',
+        lat: 51.8,
+        lon: 19.5,
+        timestamp: 1,
+      );
+      const other = Vehicle(
+        id: 'c',
+        routeId: 'route-12',
+        lat: 51.9,
+        lon: 19.6,
+        timestamp: 1,
+      );
+      const sameNumberBus = Vehicle(
+        id: 'd',
+        routeId: 'route-bus-8',
+        lat: 51.9,
+        lon: 19.6,
+        timestamp: 1,
+      );
+      when(
+        () => repo.fetchLatest(),
+      ).thenAnswer((_) async => [sameLineA, sameLineB, other, sameNumberBus]);
+      final vm = makeVm();
+      await vm.refreshOnce();
+
+      vm.selectVehicle(
+        sameLineA.id,
+        routes: {
+          'route-8-a': const Line(
+            routeId: 'route-8-a',
+            number: '8',
+            type: VehicleType.tram,
+          ),
+          'route-8-b': const Line(
+            routeId: 'route-8-b',
+            number: '8',
+            type: VehicleType.tram,
+          ),
+          'route-12': const Line(
+            routeId: 'route-12',
+            number: '12',
+            type: VehicleType.tram,
+          ),
+          'route-bus-8': const Line(
+            routeId: 'route-bus-8',
+            number: '8',
+            type: VehicleType.bus,
+          ),
+        },
+      );
+
+      expect(vm.selectedLineNumber, '8');
+      expect(vm.selectedRouteIds, {'route-8-a', 'route-8-b'});
+      expect(vm.visibleVehicles, [sameLineA, sameLineB]);
+    },
+  );
 
   test('stop() halts polling', () {
     fakeAsync((async) {

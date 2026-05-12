@@ -15,18 +15,35 @@ import 'package:mpk_lodz_tracker/ui/features/nearby/stop_detail_view_model.dart'
 class _CountingTripUpdates extends TripUpdatesRepository {
   _CountingTripUpdates() : super(service: TripUpdatesService());
   int refreshes = 0;
+  Object? error;
+  DateTime? fetchedAt;
+  Map<String, TripUpdate> snapshot = const {
+    't1': TripUpdate(
+      tripId: 't1',
+      delaySec: 0,
+      stopTimeUpdates: [
+        StopTimeUpdate(stopId: 'S1', etaUnixSec: 9999999999, delaySec: 0),
+      ],
+    ),
+  };
+
   @override
   Future<void> refresh() async {
     refreshes++;
+    fetchedAt = error == null
+        ? DateTime.fromMillisecondsSinceEpoch(refreshes)
+        : fetchedAt;
     notifyListeners();
   }
 
   @override
-  Map<String, TripUpdate> get byTripId => const {
-        't1': TripUpdate(tripId: 't1', delaySec: 0, stopTimeUpdates: [
-          StopTimeUpdate(stopId: 'S1', etaUnixSec: 9999999999, delaySec: 0),
-        ]),
-      };
+  Map<String, TripUpdate> get byTripId => snapshot;
+
+  @override
+  Object? get lastError => error;
+
+  @override
+  DateTime? get lastFetched => fetchedAt;
 }
 
 void main() {
@@ -39,8 +56,12 @@ void main() {
         tripUpdates: tu,
         departures: DeparturesRepository(
           tripUpdates: tu,
-          trips: const {'t1': TripInfo(tripId: 't1', routeId: 'r1', headsign: 'X')},
-          routes: const {'r1': Line(routeId: 'r1', number: '12', type: VehicleType.tram)},
+          trips: const {
+            't1': TripInfo(tripId: 't1', routeId: 'r1', headsign: 'X'),
+          },
+          routes: const {
+            'r1': Line(routeId: 'r1', number: '12', type: VehicleType.tram),
+          },
         ),
         lifecycle: lifecycle,
         filterLines: () => const {},
@@ -79,4 +100,61 @@ void main() {
       vm.dispose();
     });
   });
+
+  test('first refresh failure surfaces error without fake timestamp', () {
+    fakeAsync((async) {
+      final tu = _CountingTripUpdates()
+        ..snapshot = const {}
+        ..error = Exception('boom');
+      final lifecycle = AppLifecycleNotifier();
+      final vm = StopDetailViewModel(
+        stop: const Stop(id: 'S1', name: 'A', lat: 0, lon: 0),
+        tripUpdates: tu,
+        departures: DeparturesRepository(
+          tripUpdates: tu,
+          trips: const {},
+          routes: const {},
+        ),
+        lifecycle: lifecycle,
+        filterLines: () => const {},
+      );
+      async.elapse(const Duration(milliseconds: 1));
+      expect(vm.error, isNotNull);
+      expect(vm.lastFetched, isNull);
+      vm.dispose();
+    });
+  });
+
+  test(
+    'stale refresh failure keeps previous timestamp and clears UI error',
+    () {
+      fakeAsync((async) {
+        final tu = _CountingTripUpdates();
+        final lifecycle = AppLifecycleNotifier();
+        final vm = StopDetailViewModel(
+          stop: const Stop(id: 'S1', name: 'A', lat: 0, lon: 0),
+          tripUpdates: tu,
+          departures: DeparturesRepository(
+            tripUpdates: tu,
+            trips: const {
+              't1': TripInfo(tripId: 't1', routeId: 'r1', headsign: 'X'),
+            },
+            routes: const {
+              'r1': Line(routeId: 'r1', number: '12', type: VehicleType.tram),
+            },
+          ),
+          lifecycle: lifecycle,
+          filterLines: () => const {},
+        );
+        async.elapse(const Duration(milliseconds: 1));
+        final firstFetched = vm.lastFetched;
+        tu.error = Exception('boom');
+        async.elapse(const Duration(seconds: 5));
+        expect(vm.error, isNull);
+        expect(vm.lastFetched, firstFetched);
+        expect(vm.departures, isNotEmpty);
+        vm.dispose();
+      });
+    },
+  );
 }

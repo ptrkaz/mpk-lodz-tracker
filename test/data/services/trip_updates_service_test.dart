@@ -5,6 +5,7 @@ import 'package:mpk_lodz_tracker/data/services/trip_updates_service.dart';
 
 FeedMessage _makeFeed({
   required String tripId,
+  String? routeId,
   int? tripDelay,
   List<({String stopId, int? eta, int? delay})> stops = const [],
 }) {
@@ -14,10 +15,13 @@ FeedMessage _makeFeed({
       ..timestamp = Int64(0));
   final entity = FeedEntity()..id = 'e1';
   final upd = TripUpdate()..trip = (TripDescriptor()..tripId = tripId);
+  if (routeId != null) upd.trip.routeId = routeId;
   if (tripDelay != null) upd.delay = tripDelay;
   for (final s in stops) {
     final stu = TripUpdate_StopTimeUpdate()..stopId = s.stopId;
-    if (s.eta != null) stu.arrival = (TripUpdate_StopTimeEvent()..time = Int64(s.eta!));
+    if (s.eta != null) {
+      stu.arrival = (TripUpdate_StopTimeEvent()..time = Int64(s.eta!));
+    }
     if (s.delay != null) {
       stu.arrival = (stu.arrival..delay = s.delay!);
     }
@@ -40,6 +44,17 @@ void main() {
     expect(out.first.tripId, 't1');
     expect(out.first.delaySec, 60);
     expect(out.first.stopTimeUpdates.first.etaUnixSec, 1700000000);
+  });
+
+  test('decodes routeId from trip descriptor when present', () {
+    final feed = _makeFeed(
+      tripId: 't1',
+      routeId: 'r12',
+      stops: [(stopId: 's1', eta: 1700000000, delay: null)],
+    );
+    final out = TripUpdatesService.decode(feed.writeToBuffer());
+    expect(out, hasLength(1));
+    expect(out.first.routeId, 'r12');
   });
 
   test('drops trips with empty stop_time_update', () {

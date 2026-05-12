@@ -13,7 +13,9 @@ import 'package:mpk_lodz_tracker/ui/features/map/views/map_search_bar.dart';
 import 'package:provider/provider.dart';
 
 void main() {
-  testWidgets('MapSearchBar renders search field and tune button', (tester) async {
+  testWidgets('MapSearchBar renders search field and tune button', (
+    tester,
+  ) async {
     await tester.pumpWidget(
       MultiProvider(
         providers: [

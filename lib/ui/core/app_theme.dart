@@ -79,15 +79,14 @@ TextTheme _buildTextTheme(Color onSurface) {
     double letterSpacing = 0,
     bool tabular = false,
   }) {
-    return inter.bodyMedium!
-        .copyWith(
-          fontSize: size,
-          fontWeight: weight,
-          height: height / size,
-          letterSpacing: letterSpacing * size,
-          color: onSurface,
-          fontFeatures: tabular ? const [FontFeature.tabularFigures()] : null,
-        );
+    return inter.bodyMedium!.copyWith(
+      fontSize: size,
+      fontWeight: weight,
+      height: height / size,
+      letterSpacing: letterSpacing * size,
+      color: onSurface,
+      fontFeatures: tabular ? const [FontFeature.tabularFigures()] : null,
+    );
   }
 
   return TextTheme(
@@ -117,6 +116,11 @@ TextTheme _buildTextTheme(Color onSurface) {
     labelLarge: style(size: 12, weight: FontWeight.w700, height: 16),
     labelMedium: style(size: 12, weight: FontWeight.w500, height: 16),
     // mono-num — tabular figures for digit-heavy labels
-    labelSmall: style(size: 14, weight: FontWeight.w600, height: 20, tabular: true),
+    labelSmall: style(
+      size: 14,
+      weight: FontWeight.w600,
+      height: 20,
+      tabular: true,
+    ),
   );
 }

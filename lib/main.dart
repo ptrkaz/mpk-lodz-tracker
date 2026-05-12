@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 import 'data/repositories/departures_repository.dart';
+import 'data/repositories/favorite_stops_repository.dart';
 import 'data/repositories/routes_repository.dart';
 import 'data/repositories/stops_repository.dart';
 import 'data/repositories/trip_updates_repository.dart';
@@ -69,18 +70,19 @@ class MpkApp extends StatelessWidget {
               );
               if (cached != null) return cached.trips;
               final fresh = await staticService.fetchAndParseAll();
-              await cacheService.writeBundle(GtfsCachedBundle(
-                routes: fresh.routes,
-                stops: fresh.stops,
-                trips: fresh.trips,
-              ));
+              await cacheService.writeBundle(
+                GtfsCachedBundle(
+                  routes: fresh.routes,
+                  stops: fresh.stops,
+                  trips: fresh.trips,
+                  routeShapes: fresh.routeShapes,
+                ),
+              );
               return fresh.trips;
             },
           ),
         ),
-        ChangeNotifierProvider(
-          create: (_) => tripUpdatesRepo,
-        ),
+        ChangeNotifierProvider(create: (_) => tripUpdatesRepo),
         // DeparturesRepository is a plain object (not a ChangeNotifier) that
         // reads trips + routes from BootstrapViewModel once it is ready.
         // ProxyProvider rebuilds the repository whenever BootstrapViewModel
@@ -97,6 +99,10 @@ class MpkApp extends StatelessWidget {
           ),
         ),
         ChangeNotifierProvider(create: (_) => FilterViewModel()),
+        ChangeNotifierProvider(
+          lazy: false,
+          create: (_) => FavoriteStopsRepository()..load(),
+        ),
         ChangeNotifierProvider<NearbyStopsViewModel>(
           lazy: false,
           create: (_) => NearbyStopsViewModel(

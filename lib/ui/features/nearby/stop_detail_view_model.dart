@@ -18,10 +18,10 @@ class StopDetailViewModel extends ChangeNotifier {
     required DeparturesRepository departures,
     required AppLifecycleNotifier lifecycle,
     required ActiveLineIds filterLines,
-  })  : _tripUpdates = tripUpdates,
-        _departures = departures,
-        _lifecycle = lifecycle,
-        _filterLines = filterLines {
+  }) : _tripUpdates = tripUpdates,
+       _departures = departures,
+       _lifecycle = lifecycle,
+       _filterLines = filterLines {
     _lifecycle.addListener(_onLifecycle);
     _tripUpdates.addListener(_recompute);
     _start();
@@ -61,8 +61,12 @@ class StopDetailViewModel extends ChangeNotifier {
     notifyListeners();
     await _tripUpdates.refresh();
     if (_disposed) return;
-    _lastFetched = DateTime.now();
-    _error = _tripUpdates.lastError;
+    if (_tripUpdates.lastError == null) {
+      _lastFetched = _tripUpdates.lastFetched;
+      _error = null;
+    } else {
+      _error = _tripUpdates.byTripId.isEmpty ? _tripUpdates.lastError : null;
+    }
     _loading = false;
     _recompute();
   }

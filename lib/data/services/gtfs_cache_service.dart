@@ -4,6 +4,7 @@ import 'dart:io';
 import 'package:path_provider/path_provider.dart';
 
 import '../../domain/models/line.dart';
+import '../../domain/models/route_shape.dart';
 import '../../domain/models/stop.dart';
 import '../../domain/models/trip_info.dart';
 import '../../domain/models/vehicle.dart';
@@ -15,21 +16,24 @@ class GtfsCachedBundle {
     required this.routes,
     required this.stops,
     required this.trips,
+    this.routeShapes = const {},
   });
   final RoutesIndex routes;
   final StopsIndex stops;
   final TripsIndex trips;
+  final RouteShapesIndex routeShapes;
 }
 
 class GtfsCacheService {
   GtfsCacheService({DirectoryProvider? directoryProvider})
-      : _directoryProvider = directoryProvider ?? getApplicationSupportDirectory;
+    : _directoryProvider = directoryProvider ?? getApplicationSupportDirectory;
 
   final DirectoryProvider _directoryProvider;
 
   static const _routesName = 'routes.json';
   static const _stopsName = 'stops.json';
   static const _tripsName = 'trips.json';
+  static const _routeShapesName = 'route_shapes.json';
 
   Future<File> _file(String name) async {
     final dir = await _directoryProvider();
@@ -40,15 +44,18 @@ class GtfsCacheService {
     final routesFile = await _file(_routesName);
     final stopsFile = await _file(_stopsName);
     final tripsFile = await _file(_tripsName);
+    final routeShapesFile = await _file(_routeShapesName);
     if (!routesFile.existsSync() ||
         !stopsFile.existsSync() ||
-        !tripsFile.existsSync()) {
+        !tripsFile.existsSync() ||
+        !routeShapesFile.existsSync()) {
       return null;
     }
     final times = await Future.wait([
       routesFile.lastModified(),
       stopsFile.lastModified(),
       tripsFile.lastModified(),
+      routeShapesFile.lastModified(),
     ]);
     final oldest = times.reduce((a, b) => a.isBefore(b) ? a : b);
     if (DateTime.now().difference(oldest) > maxAge) return null;
@@ -57,16 +64,25 @@ class GtfsCacheService {
       routes: _decodeRoutes(jsonDecode(await routesFile.readAsString())),
       stops: _decodeStops(jsonDecode(await stopsFile.readAsString())),
       trips: _decodeTrips(jsonDecode(await tripsFile.readAsString())),
+      routeShapes: _decodeRouteShapes(
+        jsonDecode(await routeShapesFile.readAsString()),
+      ),
     );
   }
 
   Future<void> writeBundle(GtfsCachedBundle bundle) async {
-    await (await _file(_routesName))
-        .writeAsString(jsonEncode(_encodeRoutes(bundle.routes)));
-    await (await _file(_stopsName))
-        .writeAsString(jsonEncode(_encodeStops(bundle.stops)));
-    await (await _file(_tripsName))
-        .writeAsString(jsonEncode(_encodeTrips(bundle.trips)));
+    await (await _file(
+      _routesName,
+    )).writeAsString(jsonEncode(_encodeRoutes(bundle.routes)));
+    await (await _file(
+      _stopsName,
+    )).writeAsString(jsonEncode(_encodeStops(bundle.stops)));
+    await (await _file(
+      _tripsName,
+    )).writeAsString(jsonEncode(_encodeTrips(bundle.trips)));
+    await (await _file(
+      _routeShapesName,
+    )).writeAsString(jsonEncode(_encodeRouteShapes(bundle.routeShapes)));
   }
 
   // routes
@@ -141,6 +157,41 @@ class GtfsCacheService {
         tripId: j['tripId'] as String,
         routeId: j['routeId'] as String,
         headsign: j['headsign'] as String,
+      );
+    });
+    return out;
+  }
+
+  static Map<String, dynamic> _encodeRouteShapes(RouteShapesIndex idx) {
+    final out = <String, dynamic>{};
+    idx.forEach((k, v) {
+      out[k] = {
+        'routeId': v.routeId,
+        'shapeId': v.shapeId,
+        'points': [
+          for (final p in v.points) {'lat': p.lat, 'lon': p.lon},
+        ],
+      };
+    });
+    return out;
+  }
+
+  static RouteShapesIndex _decodeRouteShapes(dynamic raw) {
+    final m = raw as Map<String, dynamic>;
+    final out = <String, RouteShape>{};
+    m.forEach((k, v) {
+      final j = v as Map<String, dynamic>;
+      final points = (j['points'] as List<dynamic>).map((p) {
+        final point = p as Map<String, dynamic>;
+        return ShapePoint(
+          lat: (point['lat'] as num).toDouble(),
+          lon: (point['lon'] as num).toDouble(),
+        );
+      }).toList();
+      out[k] = RouteShape(
+        routeId: j['routeId'] as String,
+        shapeId: j['shapeId'] as String?,
+        points: points,
       );
     });
     return out;

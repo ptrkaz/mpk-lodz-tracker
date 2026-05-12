@@ -12,15 +12,15 @@ class StopsRepository {
   StopsRepository({
     required GtfsStaticService staticService,
     required GtfsCacheService cacheService,
-  })  : _static = staticService,
-        _cache = cacheService;
+  }) : _static = staticService,
+       _cache = cacheService;
 
   /// Test-only constructor that injects a pre-loaded index.
   @visibleForTesting
   StopsRepository.test(StopsIndex index)
-      : _static = null,
-        _cache = null,
-        _index = index;
+    : _static = null,
+      _cache = null,
+      _index = index;
 
   final GtfsStaticService? _static;
   final GtfsCacheService? _cache;
@@ -36,11 +36,14 @@ class StopsRepository {
       return _index!;
     }
     final fresh = await staticSvc.fetchAndParseAll();
-    await cache.writeBundle(GtfsCachedBundle(
-      routes: fresh.routes,
-      stops: fresh.stops,
-      trips: fresh.trips,
-    ));
+    await cache.writeBundle(
+      GtfsCachedBundle(
+        routes: fresh.routes,
+        stops: fresh.stops,
+        trips: fresh.trips,
+        routeShapes: fresh.routeShapes,
+      ),
+    );
     _index = fresh.stops;
     return _index!;
   }
@@ -49,10 +52,11 @@ class StopsRepository {
     Position pos, {
     double radiusM = LodzConstants.nearbyRadiusM,
     int limit = LodzConstants.nearbyLimit,
-  }) =>
-      nearbyWithDistances(pos, radiusM: radiusM, limit: limit)
-          .map((e) => e.stop)
-          .toList();
+  }) => nearbyWithDistances(
+    pos,
+    radiusM: radiusM,
+    limit: limit,
+  ).map((e) => e.stop).toList();
 
   List<({Stop stop, double distanceM})> nearbyWithDistances(
     Position pos, {
@@ -67,14 +71,18 @@ class StopsRepository {
       if (d <= radiusM) scored.add(_Scored(s, d));
     }
     scored.sort((a, b) => a.distanceM.compareTo(b.distanceM));
-    return scored.take(limit).map((e) => (stop: e.stop, distanceM: e.distanceM)).toList();
+    return scored
+        .take(limit)
+        .map((e) => (stop: e.stop, distanceM: e.distanceM))
+        .toList();
   }
 
   static double _haversine(double lat1, double lon1, double lat2, double lon2) {
     const r = 6371000.0;
     final dLat = _deg(lat2 - lat1);
     final dLon = _deg(lon2 - lon1);
-    final a = math.sin(dLat / 2) * math.sin(dLat / 2) +
+    final a =
+        math.sin(dLat / 2) * math.sin(dLat / 2) +
         math.cos(_deg(lat1)) *
             math.cos(_deg(lat2)) *
             math.sin(dLon / 2) *

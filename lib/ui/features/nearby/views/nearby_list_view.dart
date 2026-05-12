@@ -38,7 +38,8 @@ class NearbyListView extends StatelessWidget {
         const SheetHandle(),
         Padding(
           padding: const EdgeInsets.symmetric(
-            horizontal: LodzSpacing.md, vertical: LodzSpacing.xs,
+            horizontal: LodzSpacing.md,
+            vertical: LodzSpacing.xs,
           ),
           child: Align(
             alignment: Alignment.centerLeft,
@@ -72,8 +73,9 @@ class NearbyListView extends StatelessWidget {
       shrinkWrap: scrollController == null,
       padding: EdgeInsets.zero,
       itemCount: stops.length + 1, // +1 for header
-      separatorBuilder: (_, index) =>
-          index == 0 ? const SizedBox.shrink() : const Divider(height: 1, color: LodzColors.outlineVariant),
+      separatorBuilder: (_, index) => index == 0
+          ? const SizedBox.shrink()
+          : const Divider(height: 1, color: LodzColors.outlineVariant),
       itemBuilder: (_, i) {
         if (i == 0) return header;
         final s = stops[i - 1];

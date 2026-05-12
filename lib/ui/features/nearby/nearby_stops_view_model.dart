@@ -34,8 +34,9 @@ class GeolocatorGateway implements LocationGateway {
   @override
   Stream<Position> positionStream({double distanceFilter = 25}) =>
       Geolocator.getPositionStream(
-        locationSettings:
-            LocationSettings(distanceFilter: distanceFilter.toInt()),
+        locationSettings: LocationSettings(
+          distanceFilter: distanceFilter.toInt(),
+        ),
       );
   @override
   Future<Position?> getLastKnown() => Geolocator.getLastKnownPosition();
@@ -76,9 +77,9 @@ class NearbyStopsViewModel extends ChangeNotifier {
     required StopsRepository stopsRepo,
     required LocationGateway location,
     required LastFixStore lastFixStore,
-  })  : _stops = stopsRepo,
-        _loc = location,
-        _fixStore = lastFixStore;
+  }) : _stops = stopsRepo,
+       _loc = location,
+       _fixStore = lastFixStore;
 
   final StopsRepository _stops;
   final LocationGateway _loc;
@@ -127,6 +128,37 @@ class NearbyStopsViewModel extends ChangeNotifier {
       return;
     }
     var perm = await _loc.checkPermission();
+    switch (perm) {
+      case LocationPermission.denied:
+        _setStatus(LocationStatus.denied);
+        return;
+      case LocationPermission.deniedForever:
+        _setStatus(LocationStatus.deniedForever);
+        return;
+      case LocationPermission.always:
+      case LocationPermission.whileInUse:
+        _setStatus(LocationStatus.granted);
+        await _stops.getStops();
+        if (_disposed) return;
+        _recomputeNearby();
+        _subscribe();
+        break;
+      case LocationPermission.unableToDetermine:
+        _setStatus(LocationStatus.denied);
+    }
+  }
+
+  Future<void> requestLocationPermission() async {
+    if (_status == LocationStatus.serviceDisabled ||
+        _status == LocationStatus.deniedForever) {
+      await _loc.openAppSettings();
+      return;
+    }
+    if (!await _loc.isLocationServiceEnabled()) {
+      _setStatus(LocationStatus.serviceDisabled);
+      return;
+    }
+    var perm = await _loc.checkPermission();
     if (perm == LocationPermission.denied) {
       perm = await _loc.requestPermission();
     }
@@ -142,20 +174,13 @@ class NearbyStopsViewModel extends ChangeNotifier {
         _setStatus(LocationStatus.granted);
         await _stops.getStops();
         if (_disposed) return;
+        _recomputeNearby();
         _subscribe();
-        break;
+        return;
       case LocationPermission.unableToDetermine:
         _setStatus(LocationStatus.denied);
+        return;
     }
-  }
-
-  Future<void> requestLocationPermission() async {
-    if (_status == LocationStatus.serviceDisabled ||
-        _status == LocationStatus.deniedForever) {
-      await _loc.openAppSettings();
-      return;
-    }
-    await init();
   }
 
   void selectStop(Stop s) {
@@ -168,6 +193,19 @@ class NearbyStopsViewModel extends ChangeNotifier {
     if (_selected == null) return;
     _selected = null;
     notifyListeners();
+  }
+
+  void resetSheetState() {
+    var changed = false;
+    if (_selected != null) {
+      _selected = null;
+      changed = true;
+    }
+    if (_snap != SheetSnap.peek) {
+      _snap = SheetSnap.peek;
+      changed = true;
+    }
+    if (changed) notifyListeners();
   }
 
   void setSnap(SheetSnap s) {
@@ -185,8 +223,27 @@ class NearbyStopsViewModel extends ChangeNotifier {
         _fixStore.write(pos);
         _recomputeNearby();
       },
-      onError: (_) {
-        // Keep last fix; do not change status on transient errors.
+      onError: (_) async {
+        if (_disposed) return;
+        if (!await _loc.isLocationServiceEnabled()) {
+          _setStatus(LocationStatus.serviceDisabled);
+          return;
+        }
+        if (_disposed) return;
+        final perm = await _loc.checkPermission();
+        if (_disposed) return;
+        switch (perm) {
+          case LocationPermission.denied:
+            _setStatus(LocationStatus.denied);
+            break;
+          case LocationPermission.deniedForever:
+            _setStatus(LocationStatus.deniedForever);
+            break;
+          case LocationPermission.always:
+          case LocationPermission.whileInUse:
+          case LocationPermission.unableToDetermine:
+            break;
+        }
       },
     );
   }

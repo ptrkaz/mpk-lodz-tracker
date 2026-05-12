@@ -17,10 +17,8 @@ class FilterSheet extends StatefulWidget {
       context: context,
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
-      builder: (_) => const FractionallySizedBox(
-        heightFactor: 0.7,
-        child: FilterSheet(),
-      ),
+      builder: (_) =>
+          const FractionallySizedBox(heightFactor: 0.7, child: FilterSheet()),
     );
   }
 

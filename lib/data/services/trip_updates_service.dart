@@ -32,6 +32,9 @@ class TripUpdatesService {
       if (!entity.hasTripUpdate()) continue;
       final upd = entity.tripUpdate;
       final tripId = upd.hasTrip() ? upd.trip.tripId : '';
+      final routeId = upd.hasTrip() && upd.trip.routeId.isNotEmpty
+          ? upd.trip.routeId
+          : null;
       if (tripId.isEmpty) continue;
       if (upd.stopTimeUpdate.isEmpty) continue;
       final stops = <StopTimeUpdate>[];
@@ -43,14 +46,19 @@ class TripUpdatesService {
           if (stu.arrival.hasTime()) eta = stu.arrival.time.toInt();
           if (stu.arrival.hasDelay()) delay = stu.arrival.delay;
         }
-        stops.add(StopTimeUpdate(stopId: stu.stopId, etaUnixSec: eta, delaySec: delay));
+        stops.add(
+          StopTimeUpdate(stopId: stu.stopId, etaUnixSec: eta, delaySec: delay),
+        );
       }
       if (stops.isEmpty) continue;
-      out.add(TripUpdate(
-        tripId: tripId,
-        delaySec: upd.hasDelay() ? upd.delay : null,
-        stopTimeUpdates: stops,
-      ));
+      out.add(
+        TripUpdate(
+          tripId: tripId,
+          routeId: routeId,
+          delaySec: upd.hasDelay() ? upd.delay : null,
+          stopTimeUpdates: stops,
+        ),
+      );
     }
     return out;
   }

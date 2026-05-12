@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:mpk_lodz_tracker/l10n/app_localizations.dart';
+import 'package:provider/provider.dart';
 
 import '../../../core/design_tokens.dart';
 import '../../map/views/map_screen.dart';
+import '../../nearby/nearby_stops_view_model.dart';
 import 'favorites_screen.dart';
 import 'lines_screen.dart';
 
@@ -17,20 +19,33 @@ class RootShell extends StatefulWidget {
 class _RootShellState extends State<RootShell> {
   int _index = 0;
 
-  static const _screens = <Widget>[
-    MapScreen(),
-    LinesScreen(),
-    FavoritesScreen(),
-  ];
-
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
     return Scaffold(
-      body: IndexedStack(index: _index, children: _screens),
+      body: IndexedStack(
+        index: _index,
+        children: [
+          const MapScreen(),
+          const LinesScreen(),
+          FavoritesScreen(
+            onSelectStop: (stop) {
+              final nearby = context.read<NearbyStopsViewModel>();
+              nearby.selectStop(stop);
+              nearby.setSnap(SheetSnap.expanded);
+              setState(() => _index = 0);
+            },
+          ),
+        ],
+      ),
       bottomNavigationBar: _LodzBottomNav(
         index: _index,
-        onSelect: (i) => setState(() => _index = i),
+        onSelect: (i) {
+          if (_index == 0 && i != 0) {
+            context.read<NearbyStopsViewModel>().resetSheetState();
+          }
+          setState(() => _index = i);
+        },
         labels: [l10n.navMap, l10n.navLines, l10n.navFavorites],
       ),
     );

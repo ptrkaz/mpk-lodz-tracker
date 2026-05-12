@@ -36,10 +36,7 @@ void main() {
     GoogleFonts.config.allowRuntimeFetching = false;
 
     final theme = buildLightTheme();
-    await tester.pumpWidget(MaterialApp(
-      theme: theme,
-      home: const SizedBox(),
-    ));
+    await tester.pumpWidget(MaterialApp(theme: theme, home: const SizedBox()));
 
     expect(theme.colorScheme.primary, LodzColors.primary);
     expect(theme.colorScheme.surface, LodzColors.surface);

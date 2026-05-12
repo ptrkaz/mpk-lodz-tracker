@@ -42,7 +42,10 @@ class LineChip extends StatelessWidget {
       borderRadius: BorderRadius.circular(LodzRadius.full),
       child: Container(
         key: const ValueKey('line-chip-container'),
-        margin: const EdgeInsets.only(right: LodzSpacing.sm, bottom: LodzSpacing.sm),
+        margin: const EdgeInsets.only(
+          right: LodzSpacing.sm,
+          bottom: LodzSpacing.sm,
+        ),
         padding: EdgeInsets.symmetric(
           horizontal: _horizontal,
           vertical: _vertical,

@@ -86,10 +86,7 @@ void main() {
 
     test('throws when stops.txt missing', () async {
       final zip = _zip({'other.txt': 'x'});
-      expect(
-        () => GtfsStaticService.parseStopsFromZip(zip),
-        throwsException,
-      );
+      expect(() => GtfsStaticService.parseStopsFromZip(zip), throwsException);
     });
   });
 
@@ -116,6 +113,44 @@ void main() {
       });
       final trips = await GtfsStaticService.parseTripsFromZip(zip);
       expect(trips.keys, ['t2']);
+    });
+  });
+
+  group('parseRouteShapesFromZip', () {
+    test('builds route shapes from trips and ordered shapes rows', () async {
+      final zip = _zip({
+        'trips.txt':
+            'route_id,service_id,trip_id,trip_headsign,shape_id\n'
+            'r1,s1,t1,Stoki,shape-a\n'
+            'r2,s1,t2,Retkinia,shape-b\n',
+        'shapes.txt':
+            'shape_id,shape_pt_lat,shape_pt_lon,shape_pt_sequence\n'
+            'shape-a,51.760,19.450,2\n'
+            'shape-a,51.750,19.440,1\n'
+            'shape-b,51.770,19.460,1\n'
+            'shape-b,51.780,19.470,2\n',
+      });
+
+      final shapes = await GtfsStaticService.parseRouteShapesFromZip(zip);
+
+      expect(shapes.keys, containsAll(['r1', 'r2']));
+      expect(shapes['r1']!.points.map((p) => p.lat), [51.750, 51.760]);
+      expect(shapes['r1']!.points.map((p) => p.lon), [19.440, 19.450]);
+    });
+
+    test('skips shapes with fewer than two points', () async {
+      final zip = _zip({
+        'trips.txt':
+            'route_id,service_id,trip_id,trip_headsign,shape_id\n'
+            'r1,s1,t1,Stoki,shape-a\n',
+        'shapes.txt':
+            'shape_id,shape_pt_lat,shape_pt_lon,shape_pt_sequence\n'
+            'shape-a,51.760,19.450,1\n',
+      });
+
+      final shapes = await GtfsStaticService.parseRouteShapesFromZip(zip);
+
+      expect(shapes, isEmpty);
     });
   });
 }

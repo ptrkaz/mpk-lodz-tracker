@@ -31,8 +31,8 @@ class LinesScreen extends StatelessWidget {
                 Text(
                   l10n.screenComingSoon,
                   style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                        color: LodzColors.onSurfaceVariant,
-                      ),
+                    color: LodzColors.onSurfaceVariant,
+                  ),
                 ),
               ],
             ),

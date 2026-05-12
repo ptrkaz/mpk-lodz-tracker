@@ -51,6 +51,8 @@
   "@navFavorites": {},
   "screenComingSoon": "Wkrótce",
   "@screenComingSoon": {},
+  "favoritesEmpty": "Zapisane przystanki pojawią się tutaj",
+  "@favoritesEmpty": {},
   "nearbyStopsCount": "{count, plural, one{1 przystanek w pobliżu} few{{count} przystanki w pobliżu} many{{count} przystanków w pobliżu} other{{count} przystanków w pobliżu}}",
   "@nearbyStopsCount": { "placeholders": { "count": { "type": "int" } } },
   "nearbyEmptyNoStops": "Brak przystanków w promieniu 500 m",

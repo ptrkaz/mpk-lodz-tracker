@@ -20,11 +20,13 @@ void main() {
   test('TripUpdate composes StopTimeUpdate list', () {
     const u = TripUpdate(
       tripId: 't1',
+      routeId: 'r12',
       delaySec: 60,
       stopTimeUpdates: [
         StopTimeUpdate(stopId: 's1', etaUnixSec: 1000, delaySec: 60),
       ],
     );
+    expect(u.routeId, 'r12');
     expect(u.stopTimeUpdates.length, 1);
     expect(u.stopTimeUpdates.first.stopId, 's1');
   });

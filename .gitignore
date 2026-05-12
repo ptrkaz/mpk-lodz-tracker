@@ -67,3 +67,7 @@ __fixtures__/.cache/
 # Local direnv config. .envrc.example IS committed; .envrc is NOT, so
 # user-specific tweaks (extra `export FOO=...`, `dotenv`, etc.) stay local.
 /.envrc
+
+# MemPalace per-project files (issue #185)
+mempalace.yaml
+entities.json

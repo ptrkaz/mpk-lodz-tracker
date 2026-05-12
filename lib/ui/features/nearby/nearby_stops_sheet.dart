@@ -2,7 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 import '../../../data/repositories/departures_repository.dart';
+import '../../../data/repositories/favorite_stops_repository.dart';
 import '../../../data/repositories/trip_updates_repository.dart';
+import '../../../l10n/app_localizations.dart';
 import '../../core/app_lifecycle_notifier.dart';
 import '../../core/design_tokens.dart';
 import '../../core/lodz_constants.dart';
@@ -12,6 +14,7 @@ import 'stop_detail_view_model.dart';
 import 'views/nearby_list_view.dart';
 import 'views/permission_cta_view.dart';
 import 'views/stop_detail_view.dart';
+import 'widgets/sheet_handle.dart';
 
 class NearbyStopsSheet extends StatefulWidget {
   const NearbyStopsSheet({super.key});
@@ -23,6 +26,7 @@ class NearbyStopsSheet extends StatefulWidget {
 class _NearbyStopsSheetState extends State<NearbyStopsSheet> {
   final DraggableScrollableController _controller =
       DraggableScrollableController();
+  bool _drivingController = false;
 
   @override
   void dispose() {
@@ -31,11 +35,13 @@ class _NearbyStopsSheetState extends State<NearbyStopsSheet> {
   }
 
   void _onSizeChange(NearbyStopsViewModel vm) {
+    if (_drivingController) return;
     if (!_controller.isAttached) return;
     final size = _controller.size;
     final mid =
-        (LodzConstants.sheetPeekFraction + LodzConstants.sheetExpandedFraction) /
-            2;
+        (LodzConstants.sheetPeekFraction +
+            LodzConstants.sheetExpandedFraction) /
+        2;
     final next = size > mid ? SheetSnap.expanded : SheetSnap.peek;
     vm.setSnap(next);
   }
@@ -47,15 +53,16 @@ class _NearbyStopsSheetState extends State<NearbyStopsSheet> {
         // Auto-snap to expanded when CTA is required.
         WidgetsBinding.instance.addPostFrameCallback((_) {
           if (!_controller.isAttached) return;
-          final isCta = vm.status == LocationStatus.denied ||
+          final isCta =
+              vm.status == LocationStatus.denied ||
               vm.status == LocationStatus.deniedForever ||
               vm.status == LocationStatus.serviceDisabled;
           if (isCta && vm.snap == SheetSnap.peek) {
-            _controller.animateTo(
-              LodzConstants.sheetExpandedFraction,
-              duration: const Duration(milliseconds: 200),
-              curve: Curves.easeOut,
-            );
+            _animateTo(LodzConstants.sheetExpandedFraction);
+          } else if (!isCta &&
+              vm.snap == SheetSnap.peek &&
+              _controller.size != LodzConstants.sheetPeekFraction) {
+            _animateTo(LodzConstants.sheetPeekFraction);
           }
         });
 
@@ -84,16 +91,26 @@ class _NearbyStopsSheetState extends State<NearbyStopsSheet> {
                   ),
                   boxShadow: LodzShadows.sheet,
                 ),
-                child: AnimatedSwitcher(
-                  duration: const Duration(milliseconds: 200),
-                  child: _contentWithScroll(ctx, vm, scrollCtl),
-                ),
+                child: _contentWithScroll(ctx, vm, scrollCtl),
               ),
             );
           },
         );
       },
     );
+  }
+
+  Future<void> _animateTo(double size) async {
+    _drivingController = true;
+    try {
+      await _controller.animateTo(
+        size,
+        duration: const Duration(milliseconds: 200),
+        curve: Curves.easeOut,
+      );
+    } finally {
+      _drivingController = false;
+    }
   }
 
   /// Builds the sheet content, forwarding [scrollCtl] to list-type content and
@@ -118,6 +135,7 @@ class _NearbyStopsSheetState extends State<NearbyStopsSheet> {
         ),
       );
     }
+
     if (vm.selected != null) {
       return KeyedSubtree(
         key: ValueKey('detail-${vm.selected!.id}'),
@@ -130,30 +148,87 @@ class _NearbyStopsSheetState extends State<NearbyStopsSheet> {
             filterLines: () => ctx.read<FilterViewModel>().activeRouteIds,
           ),
           child: Consumer<StopDetailViewModel>(
-            builder: (ctx, dvm, _) => SingleChildScrollView(
-              controller: scrollCtl,
-              child: StopDetailView(
-                stop: vm.selected!,
-                departures: dvm.departures,
-                lastFetched: dvm.lastFetched,
-                now: DateTime.now(),
-                onBack: vm.clearSelection,
+            builder: (ctx, dvm, _) => Consumer<FavoriteStopsRepository>(
+              builder: (ctx, favorites, _) => SingleChildScrollView(
+                controller: scrollCtl,
+                child: StopDetailView(
+                  stop: vm.selected!,
+                  departures: dvm.departures,
+                  lastFetched: dvm.lastFetched,
+                  now: DateTime.now(),
+                  onBack: vm.clearSelection,
+                  isFavorite: favorites.isFavorite(vm.selected!.id),
+                  onToggleFavorite: () => favorites.toggle(vm.selected!),
+                ),
               ),
             ),
           ),
         ),
       );
     }
+
+    final l = AppLocalizations.of(context);
+    if (vm.status == LocationStatus.unknown) {
+      return KeyedSubtree(
+        key: const ValueKey('checking-location'),
+        child: SingleChildScrollView(
+          controller: scrollCtl,
+          child: _SheetStatusMessage(message: l.nearbyCheckingLocation),
+        ),
+      );
+    }
+
+    if (vm.status == LocationStatus.granted && vm.lastFix == null) {
+      return KeyedSubtree(
+        key: const ValueKey('waiting-for-gps'),
+        child: SingleChildScrollView(
+          controller: scrollCtl,
+          child: _SheetStatusMessage(message: l.nearbyWaitingForGps),
+        ),
+      );
+    }
+
     // NearbyListView is a ListView; pass scrollCtl directly so the
     // DraggableScrollableSheet drives it.
     return KeyedSubtree(
-      key: const ValueKey('list'),
+      key: const ValueKey('nearby-list'),
       child: NearbyListView(
         stops: vm.nearby,
         linesByStopId: vm.linesByStopId,
         distancesByStopId: vm.distancesByStopId,
         onTapStop: vm.selectStop,
         scrollController: scrollCtl,
+      ),
+    );
+  }
+}
+
+class _SheetStatusMessage extends StatelessWidget {
+  const _SheetStatusMessage({required this.message});
+
+  final String message;
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: LodzSpacing.lg),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          const SheetHandle(),
+          Padding(
+            padding: const EdgeInsets.symmetric(vertical: LodzSpacing.lg),
+            child: Center(
+              child: Text(
+                message,
+                textAlign: TextAlign.center,
+                style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                  color: LodzColors.onSurfaceVariant,
+                ),
+              ),
+            ),
+          ),
+        ],
       ),
     );
   }

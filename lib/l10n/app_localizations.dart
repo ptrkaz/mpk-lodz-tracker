@@ -226,6 +226,12 @@ abstract class AppLocalizations {
   /// **'Wkrótce'**
   String get screenComingSoon;
 
+  /// No description provided for @favoritesEmpty.
+  ///
+  /// In pl, this message translates to:
+  /// **'Zapisane przystanki pojawią się tutaj'**
+  String get favoritesEmpty;
+
   /// No description provided for @nearbyStopsCount.
   ///
   /// In pl, this message translates to:

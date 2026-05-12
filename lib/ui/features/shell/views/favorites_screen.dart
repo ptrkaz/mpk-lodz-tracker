@@ -1,40 +1,70 @@
 import 'package:flutter/material.dart';
+import 'package:mpk_lodz_tracker/data/repositories/favorite_stops_repository.dart';
+import 'package:mpk_lodz_tracker/domain/models/stop.dart';
 import 'package:mpk_lodz_tracker/l10n/app_localizations.dart';
+import 'package:provider/provider.dart';
 
 import '../../../core/design_tokens.dart';
 
 class FavoritesScreen extends StatelessWidget {
-  const FavoritesScreen({super.key});
+  const FavoritesScreen({super.key, this.onSelectStop});
+
+  final ValueChanged<Stop>? onSelectStop;
 
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
+    final favorites = context.watch<FavoriteStopsRepository>().favorites;
     return Scaffold(
       body: SafeArea(
-        child: Center(
-          child: Padding(
-            padding: const EdgeInsets.all(LodzSpacing.lg),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                const Icon(Icons.star_border,
-                    size: 64, color: LodzColors.outline),
-                const SizedBox(height: LodzSpacing.md),
-                Text(
-                  l10n.navFavorites,
-                  style: Theme.of(context).textTheme.headlineMedium,
-                ),
-                const SizedBox(height: LodzSpacing.xs),
-                Text(
-                  l10n.screenComingSoon,
-                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                        color: LodzColors.onSurfaceVariant,
+        child: favorites.isEmpty
+            ? Center(
+                child: Padding(
+                  padding: const EdgeInsets.all(LodzSpacing.lg),
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      const Icon(
+                        Icons.star_border,
+                        size: 64,
+                        color: LodzColors.outline,
                       ),
+                      const SizedBox(height: LodzSpacing.md),
+                      Text(
+                        l10n.navFavorites,
+                        style: Theme.of(context).textTheme.headlineMedium,
+                      ),
+                      const SizedBox(height: LodzSpacing.xs),
+                      Text(
+                        l10n.favoritesEmpty,
+                        textAlign: TextAlign.center,
+                        style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                          color: LodzColors.onSurfaceVariant,
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
-              ],
-            ),
-          ),
-        ),
+              )
+            : ListView.separated(
+                padding: const EdgeInsets.all(LodzSpacing.md),
+                itemBuilder: (context, index) {
+                  final stop = favorites[index];
+                  return ListTile(
+                    leading: const Icon(
+                      Icons.star,
+                      color: LodzColors.transitCyan,
+                    ),
+                    title: Text(stop.name),
+                    subtitle: Text(stop.id),
+                    onTap: onSelectStop == null
+                        ? null
+                        : () => onSelectStop!(stop),
+                  );
+                },
+                separatorBuilder: (_, _) => const Divider(height: 1),
+                itemCount: favorites.length,
+              ),
       ),
     );
   }

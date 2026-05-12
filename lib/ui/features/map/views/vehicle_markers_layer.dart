@@ -29,6 +29,24 @@ class VehicleMarkersLayer {
 
   VehicleMarkersLayer(this.controller);
 
+  static bool isVehicleLayer(String layerId) =>
+      layerId == _circleLayerId ||
+      layerId == _circleStrokeLayerId ||
+      layerId == _labelLayerId ||
+      layerId == _bearingLayerId;
+
+  static String? vehicleIdForFeatureTap({
+    required String layerId,
+    required String featureId,
+    required List<Vehicle> vehicles,
+  }) {
+    if (!isVehicleLayer(layerId)) return null;
+    for (final vehicle in vehicles) {
+      if (vehicle.id == featureId) return vehicle.id;
+    }
+    return null;
+  }
+
   Future<void> sync(List<Vehicle> vehicles, RoutesIndex routes) async {
     final fc = _toFeatureCollection(vehicles, routes);
     if (!_initialized) {
@@ -44,16 +62,16 @@ class VehicleMarkersLayer {
 
       // Filter for individual (unclustered) vehicles. Clusters get their own
       // layers below so their labels never collide with route numbers.
-      final notCluster = ['!', ['has', 'point_count']];
+      final notCluster = [
+        '!',
+        ['has', 'point_count'],
+      ];
 
       // Background: white halo for separation from map.
       await controller.addCircleLayer(
         _sourceId,
         _circleStrokeLayerId,
-        const CircleLayerProperties(
-          circleColor: '#ffffff',
-          circleRadius: 17,
-        ),
+        const CircleLayerProperties(circleColor: '#ffffff', circleRadius: 17),
         filter: notCluster,
       );
 
@@ -120,7 +138,11 @@ class VehicleMarkersLayer {
           iconAllowOverlap: true,
           iconIgnorePlacement: true,
         ),
-        filter: ['all', ['has', 'bearing'], notCluster],
+        filter: [
+          'all',
+          ['has', 'bearing'],
+          notCluster,
+        ],
       );
 
       // Cluster bubble — neutral dark surface so it reads as "multiple
@@ -129,10 +151,7 @@ class VehicleMarkersLayer {
       await controller.addCircleLayer(
         _sourceId,
         _clusterStrokeLayerId,
-        const CircleLayerProperties(
-          circleColor: '#ffffff',
-          circleRadius: 19,
-        ),
+        const CircleLayerProperties(circleColor: '#ffffff', circleRadius: 19),
         filter: isCluster,
       );
       await controller.addCircleLayer(
@@ -203,6 +222,7 @@ class VehicleMarkersLayer {
     final features = vehicles.map((v) {
       final line = resolveLine(v.routeId, routes);
       final props = <String, dynamic>{
+        'id': v.id,
         'number': line.number,
         'type': line.type.name,
         'routeId': v.routeId,
@@ -210,6 +230,7 @@ class VehicleMarkersLayer {
       if (v.bearing != null) props['bearing'] = v.bearing;
       return {
         'type': 'Feature',
+        'id': v.id,
         'geometry': {
           'type': 'Point',
           'coordinates': [v.lon, v.lat],

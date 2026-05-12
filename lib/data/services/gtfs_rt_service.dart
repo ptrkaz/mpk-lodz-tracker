@@ -35,15 +35,17 @@ class GtfsRtService {
       if (!pos.hasLatitude() || !pos.hasLongitude()) continue;
       final routeId = v.hasTrip() ? v.trip.routeId : '';
       if (routeId.isEmpty) continue;
-      out.add(Vehicle(
-        id: entity.id,
-        routeId: routeId,
-        lat: pos.latitude,
-        lon: pos.longitude,
-        timestamp: v.hasTimestamp() ? v.timestamp.toInt() : 0,
-        bearing: pos.hasBearing() ? pos.bearing : null,
-        speed: pos.hasSpeed() ? pos.speed : null,
-      ));
+      out.add(
+        Vehicle(
+          id: entity.id,
+          routeId: routeId,
+          lat: pos.latitude,
+          lon: pos.longitude,
+          timestamp: v.hasTimestamp() ? v.timestamp.toInt() : 0,
+          bearing: pos.hasBearing() ? pos.bearing : null,
+          speed: pos.hasSpeed() ? pos.speed : null,
+        ),
+      );
     }
     return out;
   }

@@ -15,6 +15,8 @@ class StopDetailView extends StatelessWidget {
     required this.lastFetched,
     required this.now,
     required this.onBack,
+    required this.isFavorite,
+    required this.onToggleFavorite,
   });
 
   final Stop stop;
@@ -22,6 +24,8 @@ class StopDetailView extends StatelessWidget {
   final DateTime? lastFetched;
   final DateTime now;
   final VoidCallback onBack;
+  final bool isFavorite;
+  final VoidCallback onToggleFavorite;
 
   String _hhmmss(DateTime t) =>
       '${t.hour.toString().padLeft(2, '0')}:'
@@ -37,19 +41,20 @@ class StopDetailView extends StatelessWidget {
         const SheetHandle(),
         Padding(
           padding: const EdgeInsets.symmetric(
-            horizontal: LodzSpacing.sm, vertical: LodzSpacing.xs,
+            horizontal: LodzSpacing.sm,
+            vertical: LodzSpacing.xs,
           ),
           child: Row(
             children: [
-              IconButton(
-                icon: const Icon(Icons.arrow_back),
-                onPressed: onBack,
-              ),
+              IconButton(icon: const Icon(Icons.arrow_back), onPressed: onBack),
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(stop.name, style: Theme.of(context).textTheme.titleLarge),
+                    Text(
+                      stop.name,
+                      style: Theme.of(context).textTheme.titleLarge,
+                    ),
                     if (lastFetched != null)
                       Text(
                         l.lastUpdatedAt(_hhmmss(lastFetched!)),
@@ -57,6 +62,10 @@ class StopDetailView extends StatelessWidget {
                       ),
                   ],
                 ),
+              ),
+              IconButton(
+                icon: Icon(isFavorite ? Icons.star : Icons.star_border),
+                onPressed: onToggleFavorite,
               ),
             ],
           ),

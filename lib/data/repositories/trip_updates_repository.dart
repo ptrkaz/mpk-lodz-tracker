@@ -4,7 +4,8 @@ import '../../domain/models/trip_update.dart';
 import '../services/trip_updates_service.dart';
 
 class TripUpdatesRepository extends ChangeNotifier {
-  TripUpdatesRepository({required TripUpdatesService service}) : _service = service;
+  TripUpdatesRepository({required TripUpdatesService service})
+    : _service = service;
 
   final TripUpdatesService _service;
   Map<String, TripUpdate> _byTripId = const {};

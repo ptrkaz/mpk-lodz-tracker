@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:geolocator/geolocator.dart';
+import 'package:mpk_lodz_tracker/data/repositories/favorite_stops_repository.dart';
 import 'package:mpk_lodz_tracker/data/repositories/routes_repository.dart';
 import 'package:mpk_lodz_tracker/data/repositories/stops_repository.dart';
 import 'package:mpk_lodz_tracker/data/repositories/vehicles_repository.dart';
@@ -9,6 +10,7 @@ import 'package:mpk_lodz_tracker/data/services/gtfs_static_service.dart';
 import 'package:mpk_lodz_tracker/data/services/gtfs_cache_service.dart';
 import 'package:mpk_lodz_tracker/domain/models/stop.dart';
 import 'package:mpk_lodz_tracker/domain/models/trip_info.dart';
+import 'package:mpk_lodz_tracker/domain/models/vehicle.dart';
 import 'package:mpk_lodz_tracker/l10n/app_localizations.dart';
 import 'package:mpk_lodz_tracker/ui/core/app_lifecycle_notifier.dart';
 import 'package:mpk_lodz_tracker/ui/features/filter/view_models/filter_view_model.dart';
@@ -51,6 +53,13 @@ class _NoOpFixStore implements LastFixStore {
   Future<void> write(Position pos) async {}
 }
 
+class _NoOpVehiclesRepository extends VehiclesRepository {
+  _NoOpVehiclesRepository() : super(service: GtfsRtService());
+
+  @override
+  Future<List<Vehicle>> fetchLatest() async => const [];
+}
+
 void main() {
   Widget wrap(Widget child) {
     final lifecycle = AppLifecycleNotifier(); // unattached — no binding needed
@@ -59,7 +68,7 @@ void main() {
         ChangeNotifierProvider<AppLifecycleNotifier>.value(value: lifecycle),
         ChangeNotifierProvider(
           create: (_) => MapViewModel(
-            repository: VehiclesRepository(service: GtfsRtService()),
+            repository: _NoOpVehiclesRepository(),
             lifecycle: lifecycle,
           ),
         ),
@@ -74,6 +83,9 @@ void main() {
           ),
         ),
         ChangeNotifierProvider(create: (_) => FilterViewModel()),
+        ChangeNotifierProvider<FavoriteStopsRepository>(
+          create: (_) => FavoriteStopsRepository.memory(),
+        ),
         ChangeNotifierProvider<NearbyStopsViewModel>(
           create: (_) => NearbyStopsViewModel(
             stopsRepo: StopsRepository.test(const <String, Stop>{}),
@@ -111,5 +123,23 @@ void main() {
     await tester.tap(find.byIcon(Icons.star_border).first);
     await tester.pumpAndSettle();
     expect(find.byType(FavoritesScreen), findsOneWidget);
+  });
+
+  testWidgets('leaving Map clears nearby selection and returns sheet to peek', (
+    tester,
+  ) async {
+    await tester.pumpWidget(wrap(const RootShell()));
+    await tester.pump();
+
+    final context = tester.element(find.byType(RootShell));
+    final nearby = context.read<NearbyStopsViewModel>();
+    nearby.selectStop(const Stop(id: 'a', name: 'A', lat: 51.76, lon: 19.45));
+    nearby.setSnap(SheetSnap.expanded);
+
+    await tester.tap(find.byIcon(Icons.directions_transit_outlined));
+    await tester.pumpAndSettle();
+
+    expect(nearby.selected, isNull);
+    expect(nearby.snap, SheetSnap.peek);
   });
 }

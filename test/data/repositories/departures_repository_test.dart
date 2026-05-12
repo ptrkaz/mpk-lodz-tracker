@@ -9,7 +9,7 @@ import 'package:mpk_lodz_tracker/domain/models/vehicle.dart';
 
 class _StubTripUpdates extends TripUpdatesRepository {
   _StubTripUpdates(Map<String, TripUpdate> seed)
-      : super(service: TripUpdatesService()) {
+    : super(service: TripUpdatesService()) {
     _seed = seed;
   }
   late final Map<String, TripUpdate> _seed;
@@ -27,13 +27,21 @@ void main() {
     't2': const TripInfo(tripId: 't2', routeId: 'r86', headsign: 'Manufaktura'),
   };
   final updates = <String, TripUpdate>{
-    't1': const TripUpdate(tripId: 't1', delaySec: 60, stopTimeUpdates: [
-      StopTimeUpdate(stopId: 'S1', etaUnixSec: 1000, delaySec: 60),
-      StopTimeUpdate(stopId: 'S2', etaUnixSec: 1200, delaySec: 60),
-    ]),
-    't2': const TripUpdate(tripId: 't2', delaySec: 0, stopTimeUpdates: [
-      StopTimeUpdate(stopId: 'S1', etaUnixSec: 800, delaySec: 0),
-    ]),
+    't1': const TripUpdate(
+      tripId: 't1',
+      delaySec: 60,
+      stopTimeUpdates: [
+        StopTimeUpdate(stopId: 'S1', etaUnixSec: 1000, delaySec: 60),
+        StopTimeUpdate(stopId: 'S2', etaUnixSec: 1200, delaySec: 60),
+      ],
+    ),
+    't2': const TripUpdate(
+      tripId: 't2',
+      delaySec: 0,
+      stopTimeUpdates: [
+        StopTimeUpdate(stopId: 'S1', etaUnixSec: 800, delaySec: 0),
+      ],
+    ),
   };
 
   test('returns sorted, future-only departures for a stop', () {
@@ -85,5 +93,30 @@ void main() {
     );
     final out = repo.forStop('S1', now: DateTime.fromMillisecondsSinceEpoch(0));
     expect(out, hasLength(10));
+  });
+
+  test('uses trip update routeId when trip index is missing the trip', () {
+    final repo = DeparturesRepository(
+      tripUpdates: _StubTripUpdates({
+        'missing-trip': const TripUpdate(
+          tripId: 'missing-trip',
+          routeId: 'r86',
+          delaySec: 30,
+          stopTimeUpdates: [
+            StopTimeUpdate(stopId: 'S1', etaUnixSec: 1000, delaySec: null),
+          ],
+        ),
+      }),
+      trips: const {},
+      routes: routes,
+    );
+
+    final out = repo.forStop('S1', now: DateTime.fromMillisecondsSinceEpoch(0));
+
+    expect(out, hasLength(1));
+    expect(out.single.lineNumber, '86');
+    expect(out.single.lineType, VehicleType.bus);
+    expect(out.single.headsign, isNull);
+    expect(out.single.delaySec, 30);
   });
 }

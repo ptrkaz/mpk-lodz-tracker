@@ -9,9 +9,9 @@ class DeparturesRepository {
     required TripUpdatesRepository tripUpdates,
     required TripsIndex trips,
     required RoutesIndex routes,
-  })  : _tripUpdates = tripUpdates,
-        _trips = trips,
-        _routes = routes;
+  }) : _tripUpdates = tripUpdates,
+       _trips = trips,
+       _routes = routes;
 
   final TripUpdatesRepository _tripUpdates;
   final TripsIndex _trips;
@@ -29,22 +29,26 @@ class DeparturesRepository {
 
     for (final upd in _tripUpdates.byTripId.values) {
       final trip = _trips[upd.tripId];
-      final routeId = trip?.routeId ?? '';
-      if (lineFilter != null && lineFilter.isNotEmpty && !lineFilter.contains(routeId)) {
+      final routeId = trip?.routeId ?? upd.routeId ?? '';
+      if (lineFilter != null &&
+          lineFilter.isNotEmpty &&
+          !lineFilter.contains(routeId)) {
         continue;
       }
       for (final stu in upd.stopTimeUpdates) {
         if (stu.stopId != stopId) continue;
         if (stu.etaUnixSec == null) continue;
         if (stu.etaUnixSec! < nowSec) continue;
-        final line = trip == null ? null : _routes[trip.routeId];
-        out.add(Departure(
-          lineNumber: line?.number ?? routeId,
-          lineType: line?.type ?? VehicleType.unknown,
-          headsign: trip?.headsign,
-          etaUnixSec: stu.etaUnixSec!,
-          delaySec: stu.delaySec ?? upd.delaySec,
-        ));
+        final line = routeId.isEmpty ? null : resolveLine(routeId, _routes);
+        out.add(
+          Departure(
+            lineNumber: line?.number ?? routeId,
+            lineType: line?.type ?? VehicleType.unknown,
+            headsign: trip?.headsign,
+            etaUnixSec: stu.etaUnixSec!,
+            delaySec: stu.delaySec ?? upd.delaySec,
+          ),
+        );
       }
     }
 

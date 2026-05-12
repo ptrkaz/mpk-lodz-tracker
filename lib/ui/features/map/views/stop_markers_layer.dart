@@ -10,6 +10,21 @@ class StopMarkersLayer {
   static const _layerId = 'stop-circles';
   static const _selectedLayerId = 'stop-circles-selected';
 
+  static bool isStopLayer(String layerId) =>
+      layerId == _layerId || layerId == _selectedLayerId;
+
+  static Stop? stopForFeatureTap({
+    required String layerId,
+    required String featureId,
+    required List<Stop> stops,
+  }) {
+    if (!isStopLayer(layerId)) return null;
+    for (final stop in stops) {
+      if (stop.id == featureId) return stop;
+    }
+    return null;
+  }
+
   final MapLibreMapController controller;
   bool _attached = false;
 
@@ -21,10 +36,7 @@ class StopMarkersLayer {
           {
             'type': 'Feature',
             'id': s.id,
-            'properties': {
-              'id': s.id,
-              'selected': s.id == selectedId ? 1 : 0,
-            },
+            'properties': {'id': s.id, 'selected': s.id == selectedId ? 1 : 0},
             'geometry': {
               'type': 'Point',
               'coordinates': [s.lon, s.lat],
@@ -44,7 +56,11 @@ class StopMarkersLayer {
           circleStrokeColor: '#FFFFFF',
           circleStrokeWidth: 2,
         ),
-        filter: ['==', ['get', 'selected'], 0],
+        filter: [
+          '==',
+          ['get', 'selected'],
+          0,
+        ],
       );
       await controller.addCircleLayer(
         _sourceId,
@@ -55,7 +71,11 @@ class StopMarkersLayer {
           circleStrokeColor: '#FFFFFF',
           circleStrokeWidth: 3,
         ),
-        filter: ['==', ['get', 'selected'], 1],
+        filter: [
+          '==',
+          ['get', 'selected'],
+          1,
+        ],
       );
       _attached = true;
     } else {

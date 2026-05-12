@@ -21,7 +21,9 @@ class PermissionCtaView extends StatelessWidget {
     final l = AppLocalizations.of(context);
     final isService = status == LocationStatus.serviceDisabled;
     final isPermanent = status == LocationStatus.deniedForever;
-    final title = isService ? l.permissionCtaTitleService : l.permissionCtaTitleDenied;
+    final title = isService
+        ? l.permissionCtaTitleService
+        : l.permissionCtaTitleDenied;
     final useSettings = isService || isPermanent;
 
     return Center(
@@ -30,18 +32,25 @@ class PermissionCtaView extends StatelessWidget {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            const Icon(Icons.location_off_outlined,
-                size: 48, color: LodzColors.onSurfaceVariant),
+            const Icon(
+              Icons.location_off_outlined,
+              size: 48,
+              color: LodzColors.onSurfaceVariant,
+            ),
             const SizedBox(height: LodzSpacing.md),
-            Text(title,
-                textAlign: TextAlign.center,
-                style: Theme.of(context).textTheme.titleMedium),
+            Text(
+              title,
+              textAlign: TextAlign.center,
+              style: Theme.of(context).textTheme.titleMedium,
+            ),
             const SizedBox(height: LodzSpacing.lg),
             FilledButton(
               onPressed: useSettings ? onOpenSettings : onGrant,
-              child: Text(useSettings
-                  ? l.permissionCtaButtonSettings
-                  : l.permissionCtaButtonGrant),
+              child: Text(
+                useSettings
+                    ? l.permissionCtaButtonSettings
+                    : l.permissionCtaButtonGrant,
+              ),
             ),
           ],
         ),

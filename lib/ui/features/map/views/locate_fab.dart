@@ -6,18 +6,9 @@ import '../../../core/design_tokens.dart';
 import '../../nearby/nearby_stops_view_model.dart';
 
 class LocateFab extends StatelessWidget {
-  const LocateFab({
-    super.key,
-    required this.controllerProvider,
-    this.cameraBottomPadding,
-  });
+  const LocateFab({super.key, required this.controllerProvider});
 
   final MapLibreMapController? Function() controllerProvider;
-
-  /// Optional callback returning the bottom edge inset (in logical pixels) to
-  /// apply when animating the camera — e.g. to keep the user's position above
-  /// the nearby-stops sheet.
-  final double Function()? cameraBottomPadding;
 
   @override
   Widget build(BuildContext context) {
@@ -63,35 +54,9 @@ class LocateFab extends StatelessWidget {
     final ctrl = controllerProvider();
     if (ctrl == null) return;
 
-    final bottomPad = cameraBottomPadding?.call() ?? 0.0;
     await ctrl.animateCamera(
       CameraUpdate.newLatLngZoom(LatLng(fix.latitude, fix.longitude), 14),
       duration: const Duration(milliseconds: 600),
     );
-
-    // Apply camera padding after the animation so that the target point
-    // appears above the sheet when it is expanded.
-    // NOTE: MapLibre Flutter binding (maplibre_gl ^0.21) does not expose a
-    // CameraUpdate.padding constructor; we approximate by shifting the camera
-    // upward by half the sheet height when the sheet is expanded.
-    if (bottomPad > 0) {
-      // Re-animate with the shifted target so the pin sits in the visible area.
-      final shiftedTarget = LatLng(
-        fix.latitude - _latDegreesForPixels(bottomPad / 2, 14),
-        fix.longitude,
-      );
-      await ctrl.animateCamera(
-        CameraUpdate.newLatLng(shiftedTarget),
-        duration: const Duration(milliseconds: 300),
-      );
-    }
-  }
-
-  /// Rough conversion: how many degrees latitude correspond to [pixels] at the
-  /// given [zoom] level (Web Mercator, 256-px tiles).
-  static double _latDegreesForPixels(double pixels, double zoom) {
-    final metersPerPixel = 156543.03392 / (1 << zoom.toInt());
-    final meters = pixels * metersPerPixel;
-    return meters / 111320.0;
   }
 }
